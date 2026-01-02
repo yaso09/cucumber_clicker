@@ -13,7 +13,6 @@
   --border:#2c2c2c;
   --accent:#4caf50;
   --text:#eaeaea;
-  --muted:#9a9a9a;
 }
 
 *{box-sizing:border-box;user-select:none;font-family:system-ui}
@@ -138,6 +137,10 @@ nav button{
 
 <body>
 
+<!-- 🔊 SESLER -->
+<audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
+<audio id="clickSound" src="/assets/sounds/click.mp3"></audio>
+
 <header>
   <div>🥒 <span id="count">0</span></div>
   <div>🥫 <span id="pickles">0</span></div>
@@ -225,6 +228,19 @@ nav button{
 </div>
 
 <script>
+/* ===== SES ===== */
+const bgm = document.getElementById("bgm");
+const clickSound = document.getElementById("clickSound");
+bgm.volume = 0.25;
+clickSound.volume = 0.6;
+
+function playClick(){
+  clickSound.currentTime = 0;
+  clickSound.play();
+  if(bgm.paused) bgm.play();
+}
+
+/* ===== STATE ===== */
 let state=JSON.parse(localStorage.salatalik||"{}")
 Object.assign(state,{
   cucumbers:state.cucumbers||0,
@@ -236,8 +252,8 @@ Object.assign(state,{
 })
 
 const $=id=>document.getElementById(id)
-
 function save(){localStorage.salatalik=JSON.stringify(state)}
+
 function updateUI(){
   $("count").textContent=Math.floor(state.cucumbers)
   $("money").textContent=Math.floor(state.money)
@@ -245,43 +261,51 @@ function updateUI(){
   renderFactories();renderAunts();renderPickles()
 }
 
-/* CHOP */
+/* ===== CHOP ===== */
 $("chop-area").onclick=()=>{
+  playClick();
   state.cucumbers++
   knife.classList.remove("chop");void knife.offsetWidth
   knife.classList.add("chop")
   save();updateUI()
 }
 
-/* BUY */
+/* ===== BUY ===== */
 function buyFactory(){
+  playClick();
   if(state.money<100)return
   state.money-=100
   state.factories.push({on:true})
   save();updateUI()
 }
 function buyAunt(){
+  playClick();
   if(state.money<150)return
   state.money-=150
   state.aunts.push({})
   save();updateUI()
 }
 
-/* FACTORY */
+/* ===== FACTORY ===== */
 function renderFactories(){
   factoryList.innerHTML=""
   state.factories.forEach((f,i)=>{
     factoryList.innerHTML+=`
     <div class="card">
       Fabrika #${i+1}
-      <button onclick="f.on=!f.on;save();updateUI()">
+      <button onclick="toggleFactory(${i})">
         ${f.on?"Kapat":"Aç"}
       </button>
     </div>`
   })
 }
+function toggleFactory(i){
+  playClick();
+  state.factories[i].on=!state.factories[i].on
+  save();updateUI()
+}
 
-/* AUNT */
+/* ===== AUNT ===== */
 function renderAunts(){
   auntList.innerHTML=""
   state.aunts.forEach((_,i)=>{
@@ -289,12 +313,13 @@ function renderAunts(){
   })
 }
 
-/* PICKLE */
+/* ===== PICKLE ===== */
 function randomExpiry(){
   const now=Date.now()
   return{created:now,expires:now+(Math.random()*5+1)*86400000,spoiled:false}
 }
 function startPickle(){
+  playClick();
   if(state.cucumbers<10)return
   state.cucumbers-=10
   state.pickleQueue.push({t:5})
@@ -312,20 +337,22 @@ function renderPickles(){
   })
 }
 
-/* SELL */
+/* ===== SELL ===== */
 function sellCucumbers(n){
+  playClick();
   if(state.cucumbers<n)return
   state.cucumbers-=n
   state.money+=n*0.2
 }
 function sellPickles(n){
+  playClick();
   const good=state.pickles.filter(p=>!p.spoiled)
   if(good.length<n)return
   state.pickles.splice(state.pickles.indexOf(good[0]),n)
   state.money+=n*3
 }
 
-/* TICK */
+/* ===== TICK ===== */
 setInterval(()=>{
   state.factories.forEach(f=>{if(f.on)state.cucumbers++})
   state.aunts.forEach(()=>{state.pickles.push(randomExpiry())})
@@ -341,8 +368,8 @@ setInterval(()=>{
   save();updateUI()
 },1000)
 
-function openModal(id){$(id).classList.remove("hidden")}
-function closeModals(){document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
+function openModal(id){playClick();$(id).classList.remove("hidden")}
+function closeModals(){playClick();document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
 
 updateUI()
 </script>
