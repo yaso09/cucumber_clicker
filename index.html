@@ -211,6 +211,7 @@ function renderFactories(){
       <button onclick="toggleFactory(${i})">${f.on?"Kapat":"Aç"}</button>
       <button onclick="repairFactory(${i})">Tamir (20 💰)</button>
       <button onclick="upgradeFactory(${i})">Güncelle (${f.lvl*50} 💰)</button>
+      <button onclick="deleteFactory(${i})" style="background:#b71c1c;color:#fff">Sil 🗑️</button>
     </div>`
   })
 }
@@ -221,6 +222,12 @@ function upgradeFactory(i){
   let f=state.factories[i],cost=f.lvl*50
   if(state.money<cost)return
   state.money-=cost;f.lvl++;f.max+=20;f.hp=f.max
+}
+function deleteFactory(i){
+  playClick()
+  if(!confirm("Bu fabrikayı silmek istiyor musun?")) return
+  state.factories.splice(i,1)
+  save();updateUI()
 }
 
 function renderAunts(){
