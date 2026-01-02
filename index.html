@@ -6,67 +6,55 @@
 <title>Salatalık Doğra</title>
 
 <style>
-/* === CSS AYNEN KORUNDU === */
-* {
-  box-sizing: border-box;
-  user-select: none;
-  touch-action: manipulation;
-  font-family: system-ui, sans-serif;
+*{box-sizing:border-box;user-select:none;font-family:system-ui,sans-serif}
+body{margin:0;background:#0f0f0f;color:#fff}
+#game{display:flex;flex-direction:column;height:100vh}
+header{display:flex;justify-content:space-between;padding:12px;background:#1b1b1b;font-weight:bold}
+main{flex:1;display:flex;justify-content:center;align-items:center}
+#chop-area{position:relative;width:260px;height:260px}
+#knife{position:absolute;top:-60px;left:50%;width:130px;transform:translateX(-50%) rotate(-12deg)}
+#knife.chop{animation:chop .28s}
+@keyframes chop{60%{transform:translateX(-50%) translateY(135px) rotate(28deg)}}
+#cucumber{position:absolute;bottom:35px;left:50%;width:190px;transform:translateX(-50%)}
+
+nav{display:flex;padding:10px;background:#1b1b1b}
+nav button{flex:1;margin:0 5px;padding:12px;border-radius:14px;border:none;background:#2a2a2a;color:#fff}
+
+.modal{position:fixed;inset:0;background:#0f0f0ff5;padding:20px;z-index:100;overflow:auto}
+.hidden{display:none}
+.item{background:#1f1f1f;padding:12px;border-radius:12px;margin-bottom:12px}
+.factory{border:1px solid #333}
+.inactive{opacity:.5;filter:grayscale(1)}
+.close{width:100%;padding:12px;background:#444;border:none;color:#fff;border-radius:10px}
+
+.bar{height:8px;background:#333;border-radius:4px;overflow:hidden;margin-top:6px}
+.bar div{height:100%;background:#4caf50}
+
+.jar{
+  font-size:36px;
+  text-align:center;
+  animation:shake .5s infinite;
+  margin:6px 0;
 }
-body { margin: 0; background: #0f0f0f; color: #fff; }
-#game { display: flex; flex-direction: column; height: 100vh; }
-header { display: flex; justify-content: space-between; padding: 12px; background: #1b1b1b; font-weight: bold; }
-main { flex: 1; display: flex; justify-content: center; align-items: center; }
-#chop-area { position: relative; width: 260px; height: 260px; }
-#knife { position: absolute; top: -60px; left: 50%; width: 130px; transform: translateX(-50%) rotate(-12deg); z-index: 1; }
-#knife.chop { animation: knifeChop 0.28s cubic-bezier(.2,.8,.2,1); }
-
-@keyframes knifeChop {
-  0% { transform: translateX(-50%) translateY(0) rotate(-12deg); }
-  60% { transform: translateX(-50%) translateY(135px) rotate(28deg); }
-  100% { transform: translateX(-50%) translateY(0) rotate(-12deg); }
+@keyframes shake{
+  0%{transform:rotate(0)}
+  25%{transform:rotate(4deg)}
+  50%{transform:rotate(0)}
+  75%{transform:rotate(-4deg)}
 }
-
-#cucumber { position: absolute; bottom: 35px; left: 50%; width: 190px; transform: translateX(-50%); }
-
-.slice {
-  position: absolute;
-  width: 70px;
-  bottom: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: sliceFall 1.1s cubic-bezier(.25,.6,.25,1) forwards;
-}
-
-@keyframes sliceFall {
-  to {
-    transform: translateX(calc(-50% + var(--x))) translateY(200px) rotate(var(--r));
-    opacity: 0;
-  }
-}
-
-nav { display: flex; padding: 10px; background: #1b1b1b; }
-nav button { flex: 1; margin: 0 5px; padding: 12px; border-radius: 14px; border: none; background: #2a2a2a; color: #fff; font-size: 16px; }
-
-.modal { position: fixed; inset: 0; background: #0f0f0ff5; padding: 20px; z-index: 100; overflow-y: auto; }
-.hidden { display: none; }
-.item { background: #1f1f1f; padding: 12px; border-radius: 12px; margin-bottom: 12px; }
-.factory { border: 1px solid #333; }
-.bar { height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin: 6px 0; }
-.bar > div { height: 100%; background: #4caf50; }
-.factory button { margin-top: 6px; margin-right: 6px; }
-.close { width: 100%; padding: 12px; background: #444; border: none; color: white; border-radius: 10px; }
-
-canvas { width: 100%; height: 120px; background: #111; border-radius: 10px; margin-top: 10px; }
 </style>
 </head>
 
 <body>
+
+<audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
+
 <div id="game">
 
 <header>
   <div>🥒 <span id="count">0</span></div>
-  <div>Click: <span id="perClick">1</span></div>
+  <div>🥫 <span id="pickles">0</span></div>
+  <div>💰 <span id="money">0</span></div>
 </header>
 
 <main>
@@ -79,190 +67,212 @@ canvas { width: 100%; height: 120px; background: #111; border-radius: 10px; marg
 <nav>
   <button onclick="openModal('market')">🛒 Market</button>
   <button onclick="openModal('factories')">🏭 Fabrikalar</button>
+  <button onclick="openModal('aunts')">👵 Teyzeler</button>
+  <button onclick="openModal('pickle')">🥫 Turşu</button>
+  <button onclick="openModal('bazaar')">💰 Pazar</button>
 </nav>
 </div>
 
+<!-- MARKET -->
 <div id="market" class="modal hidden">
-<h2>Market</h2>
+<h2>🛒 Market</h2>
 <div class="item">
 <strong>Mini Fabrika</strong>
-<p>Üretim: 1/sn | Can: 100</p>
-<button onclick="buyFactory()">150 🥒</button>
+<p>1 🥒 / sn</p>
+<button onclick="buyFactory()">100 💰</button>
+</div>
+<div class="item">
+<strong>Turşucu Teyze</strong>
+<p>0.2 🥫 / sn</p>
+<button onclick="buyAunt()">150 💰</button>
 </div>
 <button class="close" onclick="closeModals()">Kapat</button>
 </div>
 
+<!-- FACTORIES -->
 <div id="factories" class="modal hidden">
-<h2>Fabrikalarım</h2>
+<h2>🏭 Fabrikalar</h2>
 <div id="factoryList"></div>
+<button class="close" onclick="closeModals()">Kapat</button>
+</div>
 
-<h3>Verim Grafiği</h3>
-<canvas id="chart"></canvas>
+<!-- AUNTS -->
+<div id="aunts" class="modal hidden">
+<h2>👵 Turşucu Teyzeler</h2>
+<div id="auntList"></div>
+<button class="close" onclick="closeModals()">Kapat</button>
+</div>
 
+<!-- PICKLE -->
+<div id="pickle" class="modal hidden">
+<h2>🥫 Turşu Kuruluyor</h2>
+<p>10 🥒 → 1 🥫 (5 sn)</p>
+<button onclick="startPickle()">Turşu Kur</button>
+<div id="pickleList"></div>
+<button class="close" onclick="closeModals()">Kapat</button>
+</div>
+
+<!-- BAZAAR -->
+<div id="bazaar" class="modal hidden">
+<h2>💰 Pazar</h2>
+<p>1 🥒 = 0.2 💰</p>
+<button onclick="sellCucumbers(10)">10 🥒 Sat</button>
+<hr>
+<p>1 🥫 = 3 💰</p>
+<button onclick="sellPickles(1)">1 🥫 Sat</button>
 <button class="close" onclick="closeModals()">Kapat</button>
 </div>
 
 <script>
-/* ===== STATE ===== */
-let state = JSON.parse(localStorage.salatalik || "{}");
+let state=JSON.parse(localStorage.salatalik||"{}")
 Object.assign(state,{
   cucumbers:state.cucumbers||0,
-  perClick:1,
+  money:state.money||0,
   factories:state.factories||[],
-});
+  aunts:state.aunts||[],
+  pickles:state.pickles||0,
+  pickleQueue:state.pickleQueue||[]
+})
 
-const countEl = document.getElementById("count");
-const perClickEl = document.getElementById("perClick");
-const knifeEl = document.getElementById("knife");
-const chopArea = document.getElementById("chop-area");
-const factoryList = document.getElementById("factoryList");
-const chart = document.getElementById("chart");
-const ctx = chart.getContext("2d");
+const bgm=document.getElementById("bgm")
+document.body.addEventListener("click",()=>bgm.play(),{once:true})
 
-/* === GRAPH DATA === */
-let historyClick = [];
-let historyFactory = [];
-let clickProduction = 0;
+const countEl=document.getElementById("count")
+const moneyEl=document.getElementById("money")
+const pickleEl=document.getElementById("pickles")
+const factoryList=document.getElementById("factoryList")
+const auntList=document.getElementById("auntList")
+const pickleList=document.getElementById("pickleList")
+const knifeEl=document.getElementById("knife")
+const chopArea=document.getElementById("chop-area")
 
-/* === CORE === */
 function save(){localStorage.salatalik=JSON.stringify(state)}
 function updateUI(){
-  countEl.textContent=Math.floor(state.cucumbers);
-  perClickEl.textContent=state.perClick;
+  countEl.textContent=Math.floor(state.cucumbers)
+  moneyEl.textContent=Math.floor(state.money)
+  pickleEl.textContent=Math.floor(state.pickles)
 }
 
-/* === CHOP === */
+/* CHOP */
 chopArea.onclick=()=>{
-  if(document.querySelector(".modal:not(.hidden)"))return;
-  state.cucumbers+=state.perClick;
-  clickProduction+=state.perClick;
-
-  knifeEl.classList.remove("chop");
-  void knifeEl.offsetWidth;
-  knifeEl.classList.add("chop");
-
-  spawnSlice();
-  save();updateUI();
-};
-
-function spawnSlice(){
-  const s=document.createElement("img");
-  s.src="/assets/images/cucumber_part.svg";
-  s.className="slice";
-  s.style.setProperty("--x",`${Math.random()*140-70}px`);
-  s.style.setProperty("--r",`${Math.random()*220-110}deg`);
-  chopArea.appendChild(s);
-  setTimeout(()=>s.remove(),1100);
+  state.cucumbers++
+  knifeEl.classList.remove("chop");void knifeEl.offsetWidth
+  knifeEl.classList.add("chop")
+  save();updateUI()
 }
 
-/* === FACTORIES === */
+/* BUY */
 function buyFactory(){
-  if(state.cucumbers<150)return;
-  state.cucumbers-=150;
-  state.factories.push({
-    level:1,
-    power:1,
-    health:100,
-    maxHealth:100
-  });
-  save();updateFactories();updateUI();
+  if(state.money<100)return
+  state.money-=100
+  state.factories.push({level:1,power:1,health:100,maxHealth:100,upgradeCost:50,active:true})
+  save();updateFactories();updateUI()
+}
+function buyAunt(){
+  if(state.money<150)return
+  state.money-=150
+  state.aunts.push({level:1,power:.2,health:100,maxHealth:100,upgradeCost:70,active:true})
+  save();updateAunts();updateUI()
 }
 
-function repairFactory(i){
-  let f=state.factories[i];
-  if(state.cucumbers<20)return;
-  state.cucumbers-=20;
-  f.health=Math.min(f.maxHealth,f.health+30);
-  save();updateFactories();updateUI();
-}
-
-function upgradeFactory(i){
-  let f=state.factories[i];
-  if(state.cucumbers<50)return;
-  state.cucumbers-=50;
-  f.level++;
-  f.maxHealth+=20;
-  f.health=f.maxHealth;
-  save();updateFactories();updateUI();
-}
-
+/* LISTS */
 function updateFactories(){
-  factoryList.innerHTML="";
+  factoryList.innerHTML=""
   state.factories.forEach((f,i)=>{
-    const eff=f.health/f.maxHealth;
-    const prod=f.power*f.level*eff;
-    const div=document.createElement("div");
-    div.className="item factory";
-    div.innerHTML=`
-      <strong>Fabrika #${i+1} (Lv ${f.level})</strong>
-      <p>Üretim: ${prod.toFixed(2)}/sn</p>
+    const eff=f.health/f.maxHealth
+    const p=f.active?f.power*f.level*eff:0
+    factoryList.innerHTML+=`
+    <div class="item factory ${f.active?"":"inactive"}">
+      <b>Fabrika #${i+1} — Seviye ${f.level}</b>
+      <p>${p.toFixed(2)} 🥒/sn</p>
       <div class="bar"><div style="width:${eff*100}%"></div></div>
-      <button onclick="repairFactory(${i})">Tamir (20)</button>
-      <button onclick="upgradeFactory(${i})">Upgrade (50)</button>
-    `;
-    factoryList.appendChild(div);
-  });
+      <button onclick="toggleFactory(${i})">${f.active?"Kapat":"Aç"}</button>
+      <button onclick="upgradeFactory(${i})">Upgrade (${Math.floor(f.upgradeCost)})</button>
+    </div>`
+  })
+}
+function updateAunts(){
+  auntList.innerHTML=""
+  state.aunts.forEach((a,i)=>{
+    const eff=a.health/a.maxHealth
+    const p=a.active?a.power*a.level*eff:0
+    auntList.innerHTML+=`
+    <div class="item factory ${a.active?"":"inactive"}">
+      <b>👵 Teyze #${i+1} — Seviye ${a.level}</b>
+      <p>${p.toFixed(2)} 🥫/sn</p>
+      <div class="bar"><div style="width:${eff*100}%"></div></div>
+      <button onclick="toggleAunt(${i})">${a.active?"Kapat":"Aç"}</button>
+      <button onclick="upgradeAunt(${i})">Upgrade (${Math.floor(a.upgradeCost)})</button>
+    </div>`
+  })
 }
 
-/* === TICK === */
+/* TOGGLE + UPGRADE */
+function toggleFactory(i){state.factories[i].active=!state.factories[i].active;save();updateFactories()}
+function toggleAunt(i){state.aunts[i].active=!state.aunts[i].active;save();updateAunts()}
+function upgradeFactory(i){
+  let f=state.factories[i]
+  if(state.money<f.upgradeCost)return
+  state.money-=f.upgradeCost
+  f.level++;f.maxHealth+=20;f.health=f.maxHealth;f.upgradeCost*=1.6
+  save();updateFactories();updateUI()
+}
+function upgradeAunt(i){
+  let a=state.aunts[i]
+  if(state.money<a.upgradeCost)return
+  state.money-=a.upgradeCost
+  a.level++;a.maxHealth+=20;a.health=a.maxHealth;a.upgradeCost*=1.6
+  save();updateAunts();updateUI()
+}
+
+/* MANUAL PICKLE */
+function startPickle(){
+  if(state.cucumbers<10)return
+  state.cucumbers-=10
+  state.pickleQueue.push({time:5})
+  save();updateUI()
+}
+
+/* SELL */
+function sellCucumbers(a){
+  if(state.cucumbers<a)return
+  state.cucumbers-=a
+  state.money+=a*.2
+  save();updateUI()
+}
+function sellPickles(a){
+  if(state.pickles<a)return
+  state.pickles-=a
+  state.money+=a*3
+  save();updateUI()
+}
+
+/* TICK */
 setInterval(()=>{
-  let factoryProd=0;
-
   state.factories.forEach(f=>{
-    if(f.health>0){
-      let p=f.power*f.level*(f.health/f.maxHealth);
-      factoryProd+=p;
-      state.cucumbers+=p;
-      f.health=Math.max(0,f.health-0.08); // yavaş aşınma
+    if(f.active){state.cucumbers+=f.power*f.level*(f.health/f.maxHealth);f.health-=.08}
+  })
+  state.aunts.forEach(a=>{
+    if(a.active){state.pickles+=a.power*a.level*(a.health/a.maxHealth);a.health-=.05}
+  })
+
+  pickleList.innerHTML=""
+  state.pickleQueue.forEach((p,i)=>{
+    p.time--
+    pickleList.innerHTML+=`<div class="jar">🥫 Turşu kuruluyor...</div>`
+    if(p.time<=0){
+      state.pickles++
+      state.pickleQueue.splice(i,1)
     }
-  });
+  })
 
-  historyClick.push(clickProduction);
-  historyFactory.push(factoryProd);
-  if(historyClick.length>60){
-    historyClick.shift();
-    historyFactory.shift();
-  }
-  clickProduction=0;
+  save();updateUI();updateFactories();updateAunts()
+},1000)
 
-  drawChart();
-  updateUI();updateFactories();save();
-},1000);
-
-/* === GRAPH === */
-function drawChart(){
-  chart.width=chart.clientWidth;
-  chart.height=chart.clientHeight;
-  ctx.clearRect(0,0,chart.width,chart.height);
-
-  const max=Math.max(...historyClick,...historyFactory,1);
-  ctx.lineWidth=2;
-
-  ctx.strokeStyle="#4caf50";
-  ctx.beginPath();
-  historyFactory.forEach((v,i)=>{
-    const x=i*(chart.width/60);
-    const y=chart.height-(v/max)*chart.height;
-    if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
-  });
-  ctx.stroke();
-
-  ctx.strokeStyle="#2196f3";
-  ctx.beginPath();
-  historyClick.forEach((v,i)=>{
-    const x=i*(chart.width/60);
-    const y=chart.height-(v/max)*chart.height;
-    if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
-  });
-  ctx.stroke();
-}
-
-/* === MODALS === */
 function openModal(id){document.getElementById(id).classList.remove("hidden")}
 function closeModals(){document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
 
-/* INIT */
-updateUI();updateFactories();
+updateUI();updateFactories();updateAunts()
 </script>
 </body>
 </html>
