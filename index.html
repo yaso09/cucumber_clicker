@@ -1,371 +1,315 @@
-<!DOCTYPE html>  <html lang="tr">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<title>Salatalık Doğra</title>  <style>  
-:root{  
-  --bg:#0e0e0e;  
-  --panel:#181818;  
-  --panel2:#202020;  
-  --border:#2c2c2c;  
-  --accent:#4caf50;  
-  --text:#eaeaea;  
-}  
-  
-*{box-sizing:border-box;user-select:none;font-family:system-ui}  
-body{margin:0;background:var(--bg);color:var(--text)}  
-  
-header{  
-  display:flex;  
-  justify-content:space-around;  
-  padding:12px;  
-  padding-top: 2.6rem;  
-  background:var(--panel);  
-  border-bottom:1px solid var(--border);  
-}  
-  
-main{  
-  height:calc(100vh - 120px);  
-  display:flex;  
-  justify-content:center;  
-  align-items:center;  
-}  
-  
-#chop-area{  
-  width:240px;height:240px;  
-  position:relative;  
-  background:var(--panel2);  
-  border-radius:20px;  
-  border:1px solid var(--border);  
-}  
-  
-#knife{  
-  position:absolute;  
-  top:-60px;left:50%;  
-  width:130px;  
-  transform:translateX(-50%) rotate(-15deg);  
-}  
-#knife.chop{animation:chop .25s}  
-@keyframes chop{  
-  60%{transform:translateX(-50%) translateY(120px) rotate(25deg)}  
-}  
-  
-#cucumber{  
-  position:absolute;  
-  bottom:35px;left:50%;  
-  width:180px;  
-  transform:translateX(-50%);  
-}  
-  
-nav{  
-  display:flex;  
-  background:var(--panel);  
-  border-top:1px solid var(--border);  
-}  
-nav button{  
-  flex:1;  
-  padding:12px;  
-  background:none;  
-  border:none;  
-  color:var(--text);  
-}  
-  
-.modal{  
-  position:fixed;inset:0;  
-  background:#000c;  
-  padding:20px;  
-  overflow:auto;  
-}  
-.hidden{display:none}  
-  
-.modal-box{  
-  max-width:420px;  
-  margin:auto;  
-  background:var(--panel);  
-  border-radius:16px;  
-  padding:16px;  
-}  
-  
-.card{  
-  background:var(--panel2);  
-  border:1px solid var(--border);  
-  border-radius:12px;  
-  padding:12px;  
-  margin-bottom:12px;  
-}  
-  
-.card button{  
-  width:100%;  
-  margin-top:6px;  
-  padding:8px;  
-  border:none;  
-  border-radius:10px;  
-  background:var(--accent);  
-  color:#000;  
-  font-weight:600;  
-}  
-  
-.close{  
-  width:100%;  
-  padding:10px;  
-  border:none;  
-  border-radius:10px;  
-  background:#333;  
-  color:#fff;  
-}  
-  
-.bar{  
-  height:6px;  
-  background:#333;  
-  border-radius:4px;  
-  overflow:hidden;  
-  margin-top:6px;  
-}  
-.bar div{  
-  height:100%;  
-  background:var(--accent);  
-}  
-  
-.inactive{opacity:.4}  
-</style>  </head>  <body>  <!-- SES -->  <audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salatalık Doğra</title>
+
+<style>
+:root{
+  --bg:#0e0e0e;
+  --panel:#181818;
+  --panel2:#202020;
+  --border:#2c2c2c;
+  --accent:#4caf50;
+  --text:#eaeaea;
+}
+*{box-sizing:border-box;user-select:none;font-family:system-ui}
+body{margin:0;background:var(--bg);color:var(--text)}
+header{
+  display:flex;justify-content:space-around;
+  padding:12px;padding-top:2.6rem;
+  background:var(--panel);border-bottom:1px solid var(--border)
+}
+main{
+  height:calc(100vh - 120px);
+  display:flex;justify-content:center;align-items:center
+}
+#chop-area{
+  width:240px;height:240px;position:relative;
+  background:var(--panel2);border-radius:20px;
+  border:1px solid var(--border)
+}
+#knife{
+  position:absolute;top:-60px;left:50%;
+  width:130px;transform:translateX(-50%) rotate(-15deg)
+}
+#knife.chop{animation:chop .25s}
+@keyframes chop{
+  60%{transform:translateX(-50%) translateY(120px) rotate(25deg)}
+}
+#cucumber{
+  position:absolute;bottom:35px;left:50%;
+  width:180px;transform:translateX(-50%)
+}
+nav{
+  display:flex;background:var(--panel);
+  border-top:1px solid var(--border)
+}
+nav button{
+  flex:1;padding:12px;background:none;
+  border:none;color:var(--text)
+}
+.modal{
+  position:fixed;inset:0;background:#000c;
+  padding:20px;overflow:auto
+}
+.hidden{display:none}
+.modal-box{
+  max-width:420px;margin:auto;
+  background:var(--panel);border-radius:16px;padding:16px
+}
+.card{
+  background:var(--panel2);border:1px solid var(--border);
+  border-radius:12px;padding:12px;margin-bottom:12px
+}
+.card button{
+  width:100%;margin-top:6px;padding:8px;
+  border:none;border-radius:10px;
+  background:var(--accent);color:#000;font-weight:600
+}
+.close{
+  width:100%;padding:10px;border:none;
+  border-radius:10px;background:#333;color:#fff
+}
+.bar{
+  height:6px;background:#333;border-radius:4px;
+  overflow:hidden;margin-top:6px
+}
+.bar div{height:100%;background:var(--accent)}
+.inactive{opacity:.4}
+</style>
+</head>
+
+<body>
+
+<audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
 <audio id="clickSound" src="/assets/sounds/click.mp3"></audio>
 
-<header>  
-  <div>🥒 <span id="count">0</span></div>  
-  <div>🥫 <span id="pickles">0</span></div>  
-  <div>💰 <span id="money">0</span></div>  
-</header>  <main>  
-  <div id="chop-area">  
-    <img id="knife" src="/assets/images/knife_basic.svg">  
-    <img id="cucumber" src="/assets/images/cucumber.svg">  
-  </div>  
-</main>  <nav>  
-  <button onclick="openModal('market')">Market</button>  
-  <button onclick="openModal('factories')">Fabrikalar</button>  
-  <button onclick="openModal('aunts')">Teyzeler</button>  
-  <button onclick="openModal('pickle')">Turşu</button>  
-  <button onclick="openModal('bazaar')">Pazar</button>  
-</nav>  <!-- MARKET -->  <div id="market" class="modal hidden">  
-  <div class="modal-box">  
-    <h3>Market</h3>  
-    <div class="card">  
-      Mini Fabrika  
-      <button onclick="buyFactory()">100 💰</button>  
-    </div>  
-    <div class="card">  
-      Turşucu Teyze  
-      <button onclick="buyAunt()">150 💰</button>  
-    </div>  
-    <button class="close" onclick="closeModals()">Kapat</button>  
-  </div>  
-</div>  <!-- FACTORIES -->  <div id="factories" class="modal hidden">  
-  <div class="modal-box">  
-    <h3>Fabrikalar</h3>  
-    <div id="factoryList"></div>  
-    <button class="close" onclick="closeModals()">Kapat</button>  
-  </div>  
-</div>  <!-- AUNTS -->  <div id="aunts" class="modal hidden">  
-  <div class="modal-box">  
-    <h3>Teyzeler</h3>  
-    <div id="auntList"></div>  
-    <button class="close" onclick="closeModals()">Kapat</button>  
-  </div>  
-</div>  <!-- PICKLE -->  <div id="pickle" class="modal hidden">  
-  <div class="modal-box">  
-    <h3>Turşular</h3>  
-    <div class="card">  
-      10 🥒 → 1 🥫 (5 sn)  
-      <button onclick="startPickle()">Kur</button>  
-    </div>  
-    <div id="pickleList"></div>  
-    <button class="close" onclick="closeModals()">Kapat</button>  
-  </div>  
-</div>  <!-- BAZAAR -->  <div id="bazaar" class="modal hidden">  
-  <div class="modal-box">  
-    <h3>Pazar</h3>  
-    <div class="card">  
-      10 🥒 = 2 💰  
-      <button onclick="sellCucumbers(10)">Sat</button>  
-    </div>  
-    <div class="card">  
-      1 🥫 = 3 💰  
-      <button onclick="sellPickles(1)">Sat</button>  
-    </div>  
-    <button class="close" onclick="closeModals()">Kapat</button>  
-  </div>  
-</div>  <script>  
-/* SES */  
-const bgm=document.getElementById("bgm")  
-const clickSound=document.getElementById("clickSound")  
-bgm.volume=.25;clickSound.volume=.6  
-function playClick(){  
-  clickSound.currentTime=0;clickSound.play()  
-  if(bgm.paused) bgm.play()  
-}  
-  
-/* STATE */  
-let state=JSON.parse(localStorage.salatalik||"{}")  
-Object.assign(state,{  
-  cucumbers:state.cucumbers||0,  
-  money:state.money||0,  
-  factories:state.factories||[],  
-  aunts:state.aunts||[],  
-  pickles:state.pickles||[],  
-  pickleQueue:state.pickleQueue||[]  
-})  
-  
-const $=id=>document.getElementById(id)  
-function save(){localStorage.salatalik=JSON.stringify(state)}  
-  
-function updateUI(){  
-  $("count").textContent=Math.floor(state.cucumbers)  
-  $("money").textContent=Math.floor(state.money)  
-  $("pickles").textContent=state.pickles.filter(p=>!p.spoiled).length  
-  renderFactories();renderAunts();renderPickles()  
-}  
-  
-/* CHOP */  
-$("chop-area").onclick=()=>{  
-  playClick()  
-  state.cucumbers++  
-  knife.classList.remove("chop");void knife.offsetWidth  
-  knife.classList.add("chop")  
-  save();updateUI()  
-}  
-  
-/* BUY */  
-function buyFactory(){  
-  playClick()  
-  if(state.money<100)return  
-  state.money-=100  
-  state.factories.push({lvl:1,hp:100,max:100,on:true})  
-}  
-function buyAunt(){  
-  playClick()  
-  if(state.money<150)return  
-  state.money-=150  
-  state.aunts.push({lvl:1,hp:100,max:100})  
-}  
-  
-/* FACTORIES */  
-function renderFactories(){  
-  factoryList.innerHTML=""  
-  state.factories.forEach((f,i)=>{  
-    factoryList.innerHTML+=`  
-    <div class="card ${f.hp<=0?"inactive":""}">  
-      Fabrika #${i+1} | Seviye ${f.lvl}  
-      <div class="bar"><div style="width:${f.hp/f.max*100}%"></div></div>  
-      <button onclick="toggleFactory(${i})">${f.on?"Kapat":"Aç"}</button>  
-      <button onclick="repairFactory(${i})">Tamir (20 💰)</button>  
-      <button onclick="upgradeFactory(${i})">Güncelle (${f.lvl*50} 💰)</button>  
-    </div>`  
-  })  
-}  
-function toggleFactory(i){playClick();state.factories[i].on=!state.factories[i].on}  
-function repairFactory(i){  
-  if(state.money<20)return  
-  state.money-=20  
-  state.factories[i].hp=state.factories[i].max  
-}  
-function upgradeFactory(i){  
-  let f=state.factories[i]  
-  let cost=f.lvl*50  
-  if(state.money<cost)return  
-  state.money-=cost  
-  f.lvl++;f.max+=20;f.hp=f.max  
-}  
-  
-/* AUNTS */  
-function renderAunts(){  
-  auntList.innerHTML=""  
-  state.aunts.forEach((a,i)=>{  
-    auntList.innerHTML+=`  
-    <div class="card ${a.hp<=0?"inactive":""}">  
-      Teyze #${i+1} | Seviye ${a.lvl}  
-      <div class="bar"><div style="width:${a.hp/a.max*100}%"></div></div>  
-      <button onclick="feedAunt(${i})">Doyur (15 💰)</button>  
-      <button onclick="upgradeAunt(${i})">Güncelle (${a.lvl*40} 💰)</button>  
-    </div>`  
-  })  
-}  
-function feedAunt(i){  
-  if(state.money<15)return  
-  state.money-=15  
-  state.aunts[i].hp=state.aunts[i].max  
-}  
-function upgradeAunt(i){  
-  let a=state.aunts[i]  
-  let cost=a.lvl*40  
-  if(state.money<cost)return  
-  state.money-=cost  
-  a.lvl++;a.max+=20;a.hp=a.max  
-}  
-  
-/* PICKLE */  
-function randomExpiry(){  
-  let now=Date.now()  
-  return{created:now,expires:now+(Math.random()*5+1)*86400000,spoiled:false}  
-}  
-function startPickle(){  
-  playClick()  
-  if(state.cucumbers<10)return  
-  state.cucumbers-=10  
-  state.pickleQueue.push({t:5})  
-}  
-function renderPickles(){  
-  pickleList.innerHTML=""  
-  state.pickles.forEach(p=>{  
-    let total=p.expires-p.created  
-    let left=Math.max(0,p.expires-Date.now())  
-    pickleList.innerHTML+=`  
-    <div class="card ${p.spoiled?"inactive":""}">  
-      SKT: ${new Date(p.expires).toLocaleDateString("tr")}  
-      <div class="bar"><div style="width:${left/total*100}%"></div></div>  
-    </div>`  
-  })  
-}  
-  
-/* SELL */  
-function sellCucumbers(n){  
-  playClick()  
-  if(state.cucumbers<n)return  
-  state.cucumbers-=n  
-  state.money+=n*0.2  
-}  
-function sellPickles(n){  
-  playClick()  
-  let good=state.pickles.filter(p=>!p.spoiled)  
-  if(good.length<n)return  
-  state.pickles.splice(state.pickles.indexOf(good[0]),n)  
-  state.money+=n*3  
-}  
-  
-/* TICK */  
-setInterval(()=>{  
-  state.factories.forEach(f=>{  
-    if(f.on && f.hp>0){  
-      state.cucumbers+=f.lvl  
-      f.hp--  
-    }  
-  })  
-  state.aunts.forEach(a=>{  
-    if(a.hp>0)a.hp-=.5  
-  })  
-  state.pickleQueue.forEach((p,i)=>{  
-    p.t--  
-    if(p.t<=0){  
-      state.pickles.push(randomExpiry())  
-      state.pickleQueue.splice(i,1)  
-    }  
-  })  
-  state.pickles.forEach(p=>{  
-    if(!p.spoiled && Date.now()>p.expires)p.spoiled=true  
-  })  
-  save();updateUI()  
-},1000)  
-  
-function openModal(id){playClick();$(id).classList.remove("hidden")}  
-function closeModals(){playClick();document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}  
-updateUI()  
-</script>  </body>  
+<header>
+  <div>🥒 <span id="count">0</span></div>
+  <div>🥫 <span id="pickles">0</span></div>
+  <div>💰 <span id="money">0</span></div>
+</header>
+
+<main>
+  <div id="chop-area">
+    <img id="knife" src="/assets/images/knife_basic.svg">
+    <img id="cucumber" src="/assets/images/cucumber.svg">
+  </div>
+</main>
+
+<nav>
+  <button onclick="openModal('market')">Market</button>
+  <button onclick="openModal('factories')">Fabrikalar</button>
+  <button onclick="openModal('aunts')">Teyzeler</button>
+  <button onclick="openModal('pickle')">Turşu</button>
+  <button onclick="openModal('bazaar')">Pazar</button>
+</nav>
+
+<div id="market" class="modal hidden">
+  <div class="modal-box">
+    <h3>Market</h3>
+    <div class="card">Mini Fabrika<button onclick="buyFactory()">100 💰</button></div>
+    <div class="card">Turşucu Teyze<button onclick="buyAunt()">150 💰</button></div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
+<div id="factories" class="modal hidden">
+  <div class="modal-box">
+    <h3>Fabrikalar</h3>
+    <div id="factoryList"></div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
+<div id="aunts" class="modal hidden">
+  <div class="modal-box">
+    <h3>Teyzeler</h3>
+    <div id="auntList"></div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
+<div id="pickle" class="modal hidden">
+  <div class="modal-box">
+    <h3>Turşular</h3>
+    <div class="card">10 🥒 → 1 🥫 (5 sn)<button onclick="startPickle()">Kur</button></div>
+    <div id="pickleList"></div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
+<div id="bazaar" class="modal hidden">
+  <div class="modal-box">
+    <h3>Pazar</h3>
+    <div class="card">10 🥒 = 2 💰<button onclick="sellCucumbers(10)">Sat</button></div>
+    <div class="card">1 🥫 = 3 💰<button onclick="sellPickles(1)">Sat</button></div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
+<script>
+const bgm=document.getElementById("bgm")
+const clickSound=document.getElementById("clickSound")
+bgm.volume=.25;clickSound.volume=.6
+function playClick(){
+  clickSound.currentTime=0;clickSound.play()
+  if(bgm.paused)bgm.play()
+}
+
+let state=JSON.parse(localStorage.salatalik||"{}")
+Object.assign(state,{
+  cucumbers:state.cucumbers||0,
+  money:state.money||0,
+  factories:state.factories||[],
+  aunts:state.aunts||[],
+  pickles:state.pickles||[],
+  pickleQueue:state.pickleQueue||[]
+})
+
+const $=id=>document.getElementById(id)
+function save(){localStorage.salatalik=JSON.stringify(state)}
+
+function updateUI(){
+  $("count").textContent=Math.floor(state.cucumbers)
+  $("money").textContent=Math.floor(state.money)
+  $("pickles").textContent=state.pickles.filter(p=>!p.spoiled).length
+  renderFactories();renderAunts();renderPickles()
+}
+
+$("chop-area").onclick=()=>{
+  playClick()
+  state.cucumbers++
+  knife.classList.remove("chop");void knife.offsetWidth
+  knife.classList.add("chop")
+  save();updateUI()
+}
+
+function buyFactory(){
+  playClick()
+  if(state.money<100)return
+  state.money-=100
+  state.factories.push({lvl:1,hp:100,max:100,on:true})
+}
+
+function buyAunt(){
+  playClick()
+  if(state.money<150)return
+  state.money-=150
+  state.aunts.push({lvl:1,hp:100,max:100,timer:0})
+}
+
+function renderFactories(){
+  factoryList.innerHTML=""
+  state.factories.forEach((f,i)=>{
+    factoryList.innerHTML+=`
+    <div class="card ${f.hp<=0?"inactive":""}">
+      Fabrika #${i+1} | Seviye ${f.lvl}
+      <div class="bar"><div style="width:${f.hp/f.max*100}%"></div></div>
+      <button onclick="toggleFactory(${i})">${f.on?"Kapat":"Aç"}</button>
+      <button onclick="repairFactory(${i})">Tamir (20 💰)</button>
+      <button onclick="upgradeFactory(${i})">Güncelle (${f.lvl*50} 💰)</button>
+    </div>`
+  })
+}
+
+function toggleFactory(i){playClick();state.factories[i].on=!state.factories[i].on}
+function repairFactory(i){if(state.money<20)return;state.money-=20;state.factories[i].hp=state.factories[i].max}
+function upgradeFactory(i){
+  let f=state.factories[i],cost=f.lvl*50
+  if(state.money<cost)return
+  state.money-=cost;f.lvl++;f.max+=20;f.hp=f.max
+}
+
+function renderAunts(){
+  auntList.innerHTML=""
+  state.aunts.forEach((a,i)=>{
+    auntList.innerHTML+=`
+    <div class="card ${a.hp<=0?"inactive":""}">
+      Teyze #${i+1} | Seviye ${a.lvl}
+      <div class="bar"><div style="width:${a.hp/a.max*100}%"></div></div>
+      <button onclick="feedAunt(${i})">Doyur (15 💰)</button>
+      <button onclick="upgradeAunt(${i})">Güncelle (${a.lvl*40} 💰)</button>
+    </div>`
+  })
+}
+
+function feedAunt(i){if(state.money<15)return;state.money-=15;state.aunts[i].hp=state.aunts[i].max}
+function upgradeAunt(i){
+  let a=state.aunts[i],cost=a.lvl*40
+  if(state.money<cost)return
+  state.money-=cost;a.lvl++;a.max+=20;a.hp=a.max
+}
+
+function randomExpiry(){
+  let now=Date.now()
+  return{created:now,expires:now+(Math.random()*5+1)*86400000,spoiled:false}
+}
+
+function startPickle(){
+  playClick()
+  if(state.cucumbers<10)return
+  state.cucumbers-=10
+  state.pickleQueue.push({t:5})
+}
+
+function renderPickles(){
+  pickleList.innerHTML=""
+  state.pickles.forEach(p=>{
+    let total=p.expires-p.created
+    let left=Math.max(0,p.expires-Date.now())
+    pickleList.innerHTML+=`
+    <div class="card ${p.spoiled?"inactive":""}">
+      SKT: ${new Date(p.expires).toLocaleDateString("tr")}
+      <div class="bar"><div style="width:${left/total*100}%"></div></div>
+    </div>`
+  })
+}
+
+function sellCucumbers(n){playClick();if(state.cucumbers<n)return;state.cucumbers-=n;state.money+=n*0.2}
+function sellPickles(n){
+  playClick()
+  let good=state.pickles.filter(p=>!p.spoiled)
+  if(good.length<n)return
+  state.pickles.splice(state.pickles.indexOf(good[0]),n)
+  state.money+=n*3
+}
+
+setInterval(()=>{
+  state.factories.forEach(f=>{
+    if(f.on && f.hp>0){state.cucumbers+=f.lvl;f.hp--}
+  })
+
+  state.aunts.forEach(a=>{
+    if(a.hp>0){
+      a.hp-=.5
+      a.timer++
+      if(a.timer>=5){
+        if(state.cucumbers>=10){
+          state.cucumbers-=10
+          state.pickles.push(randomExpiry())
+        }
+        a.timer=0
+      }
+    }
+  })
+
+  state.pickleQueue.forEach((p,i)=>{
+    p.t--
+    if(p.t<=0){state.pickles.push(randomExpiry());state.pickleQueue.splice(i,1)}
+  })
+
+  state.pickles.forEach(p=>{if(!p.spoiled && Date.now()>p.expires)p.spoiled=true})
+
+  save();updateUI()
+},1000)
+
+function openModal(id){playClick();$(id).classList.remove("hidden")}
+function closeModals(){playClick();document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
+updateUI()
+</script>
+
+</body>
 </html>
