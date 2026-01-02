@@ -8,68 +8,40 @@
 <style>
 *{box-sizing:border-box;user-select:none;font-family:system-ui,sans-serif}
 body{margin:0;background:#0f0f0f;color:#fff}
-#game{padding:10px;max-width:500px;margin:auto}
-h1{text-align:center}
-
+#game{display:flex;flex-direction:column;height:100vh;padding:10px;gap:8px}
+.panel{background:#181818;border:1px solid #2c2c2c;border-radius:10px;padding:10px}
 button{
-  background:#2a2a2a;
-  color:#fff;
-  border:1px solid #333;
-  padding:8px 12px;
-  margin:4px;
-  border-radius:6px;
+  background:#222;border:1px solid #333;color:#fff;
+  padding:6px 10px;border-radius:6px;margin:2px
 }
+button:active{transform:scale(.96)}
+h2{margin:0 0 6px 0;font-size:16px}
 
-.panel{background:#181818;padding:10px;border-radius:10px;margin-bottom:10px}
-.row{display:flex;flex-wrap:wrap;gap:5px}
+#cucumber{font-size:64px;text-align:center;cursor:pointer}
 
-#cucumber{
-  font-size:64px;
-  text-align:center;
-  cursor:pointer;
-}
+.bar{height:6px;background:#333;border-radius:4px;overflow:hidden}
+.bar>div{height:100%;background:#4caf50}
+
+.card{background:#202020;border:1px solid #333;border-radius:8px;padding:6px;margin-bottom:5px}
+.inactive{opacity:.4}
 
 .drop{
-  position:absolute;
-  font-size:24px;
-  animation:fall 0.6s linear forwards;
+  position:absolute;font-size:24px;
+  animation:fall .6s linear forwards
 }
 @keyframes fall{
-  from{transform:translateY(0);opacity:1}
   to{transform:translateY(80px);opacity:0}
 }
-
-.card{
-  background:#202020;
-  padding:8px;
-  border-radius:8px;
-  margin-bottom:6px;
-  border:1px solid #333;
-}
-
-.bar{
-  background:#333;
-  height:8px;
-  border-radius:5px;
-  overflow:hidden;
-}
-.bar>div{
-  background:#4caf50;
-  height:100%;
-}
-
-.inactive{opacity:.4}
 </style>
 </head>
 <body>
 
 <div id="game">
-<h1>🥒 Salatalık Doğra</h1>
 
 <div class="panel">
-  💰 Para: <span id="money">0</span><br>
-  🥒 Salatalık: <span id="cuk">0</span><br>
-  🥫 Turşu: <span id="pickle">0</span>
+  💰 <span id="money">0</span> |
+  🥒 <span id="cuk">0</span> |
+  🥫 <span id="pickle">0</span>
 </div>
 
 <div class="panel">
@@ -77,162 +49,123 @@ button{
 </div>
 
 <div class="panel">
-  <button onclick="sell()">Pazarda Sat (10 🥒 → 5 💰)</button>
-  <button onclick="makePickle()">Turşu Kur (10 🥒)</button>
+  <button onclick="sell()">🛒 Pazarda Sat (10 🥒)</button>
+  <button onclick="makePickle()">🥫 Turşu Kur</button>
 </div>
 
 <div class="panel">
-  <h3>🏭 Fabrika</h3>
-  <div id="factoryInfo"></div>
+  <h2>🏭 Fabrika</h2>
+  <div id="factoryUI"></div>
   <button onclick="toggleFactory()">Aç / Kapat</button>
-  <button onclick="repairFactory()">Tamir (20 💰)</button>
+  <button onclick="repairFactory()">Tamir</button>
   <button onclick="upgradeFactory()">Güncelle</button>
 </div>
 
 <div class="panel">
-  <h3>👵 Teyzeler</h3>
-  <button onclick="buyAunt()">Teyze Al (150 💰)</button>
+  <h2>👵 Teyzeler</h2>
+  <button onclick="buyAunt()">Teyze Al</button>
   <div id="aunts"></div>
 </div>
 
 <div class="panel">
-  <h3>🥫 Turşular</h3>
+  <h2>🥫 Turşular</h2>
   <div id="pickles"></div>
 </div>
+
 </div>
 
 <audio id="click" src="/assets/sounds/click.mp3"></audio>
 
 <script>
-const state={
-  money:0,
-  cuk:0,
-  pickles:[],
-  factory:{on:true,hp:100,max:100,lvl:1,timer:0},
+const S={
+  money:0,cuk:0,pickles:[],
+  factory:{on:true,hp:100,max:100,lvl:1,t:0},
   aunts:[]
 }
 
-function play(){
-  const a=document.getElementById("click")
-  a.currentTime=0;a.play()
-}
+const click=()=>{const a=document.getElementById("click");a.currentTime=0;a.play()}
 
 function cut(){
-  play()
-  state.cuk++
+  click()
+  S.cuk++
   const d=document.createElement("div")
-  d.className="drop"
+  d.className="drop";d.innerText="🥒"
   d.style.left=Math.random()*300+"px"
-  d.innerText="🥒"
   document.body.appendChild(d)
   setTimeout(()=>d.remove(),600)
 }
 
-function sell(){
-  if(state.cuk<10)return
-  state.cuk-=10
-  state.money+=5
+function sell(){if(S.cuk>=10){S.cuk-=10;S.money+=5}}
+function rndExp(){
+  const d=(Math.random()*7+1)|0
+  return {exp:Date.now()+d*86400000}
 }
+function makePickle(){if(S.cuk>=10){S.cuk-=10;S.pickles.push(rndExp())}}
 
-function randomExpiry(){
-  const now=Date.now()
-  const days=Math.floor(Math.random()*7)+1
-  return {exp:now+days*86400000}
-}
-
-function makePickle(){
-  if(state.cuk<10)return
-  state.cuk-=10
-  state.pickles.push(randomExpiry())
-}
-
-function toggleFactory(){
-  state.factory.on=!state.factory.on
-}
-
+function toggleFactory(){S.factory.on=!S.factory.on}
 function repairFactory(){
-  if(state.money<20)return
-  state.money-=20
-  state.factory.hp=state.factory.max
+  if(S.money<20)return
+  S.money-=20;S.factory.hp=S.factory.max
 }
-
 function upgradeFactory(){
-  const cost=state.factory.lvl*50
-  if(state.money<cost)return
-  state.money-=cost
-  state.factory.lvl++
-  state.factory.max+=20
+  const c=S.factory.lvl*50
+  if(S.money<c)return
+  S.money-=c;S.factory.lvl++;S.factory.max+=20
 }
 
 function buyAunt(){
-  if(state.money<150)return
-  state.money-=150
-  state.aunts.push({hp:100,max:100,lvl:1,timer:0})
+  if(S.money<150)return
+  S.money-=150
+  S.aunts.push({hp:100,max:100,lvl:1,t:0})
 }
-
 function feedAunt(i){
-  if(state.money<15)return
-  state.money-=15
-  state.aunts[i].hp=state.aunts[i].max
+  if(S.money<15)return
+  S.money-=15;S.aunts[i].hp=S.aunts[i].max
 }
-
 function upgradeAunt(i){
-  const cost=state.aunts[i].lvl*40
-  if(state.money<cost)return
-  state.money-=cost
-  state.aunts[i].lvl++
-  state.aunts[i].max+=20
+  const c=S.aunts[i].lvl*40
+  if(S.money<c)return
+  S.money-=c;S.aunts[i].lvl++;S.aunts[i].max+=20
 }
 
 setInterval(()=>{
-  // fabrika
-  const f=state.factory
+  const f=S.factory
   if(f.on && f.hp>0){
-    f.timer++
-    if(f.timer>10-f.lvl && state.cuk>=5){
-      state.cuk-=5
-      state.pickles.push(randomExpiry())
-      f.timer=0
+    f.t++
+    if(f.t>10-f.lvl && S.cuk>=5){
+      S.cuk-=5;S.pickles.push(rndExp());f.t=0
     }
-    f.hp-=0.2
+    f.hp-=.2
   }
 
-  // teyzeler
-  state.aunts.forEach(a=>{
+  S.aunts.forEach(a=>{
     if(a.hp<=0)return
-    a.hp-=0.3
-    a.timer++
-    const need=Math.max(2,8-a.lvl)
-    if(a.timer>=need && state.cuk>=10){
-      state.cuk-=10
-      state.pickles.push(randomExpiry())
-      a.timer=0
+    a.hp-=.3;a.t++
+    if(a.t>=Math.max(2,8-a.lvl) && S.cuk>=10){
+      S.cuk-=10;S.pickles.push(rndExp());a.t=0
     }
   })
 
-  // bozulma
   const now=Date.now()
-  state.pickles=state.pickles.filter(p=>p.exp>now)
-
+  S.pickles=S.pickles.filter(p=>p.exp>now)
   render()
 },1000)
 
 function render(){
-  money.textContent=state.money
-  cuk.textContent=state.cuk
-  pickle.textContent=state.pickles.length
+  money.textContent=S.money
+  cuk.textContent=S.cuk
+  pickle.textContent=S.pickles.length
 
-  factoryInfo.innerHTML=`
-  Seviye ${state.factory.lvl}<br>
-  Can:
-  <div class="bar"><div style="width:${state.factory.hp/state.factory.max*100}%"></div></div>
+  factoryUI.innerHTML=`
+  Seviye ${S.factory.lvl} | ${S.factory.on?"Açık":"Kapalı"}
+  <div class="bar"><div style="width:${S.factory.hp/S.factory.max*100}%"></div></div>
   `
 
   aunts.innerHTML=""
-  state.aunts.forEach((a,i)=>{
+  S.aunts.forEach((a,i)=>{
     aunts.innerHTML+=`
     <div class="card ${a.hp<=0?"inactive":""}">
-      Teyze ${i+1} | Seviye ${a.lvl}<br>
+      Teyze ${i+1} | Lv ${a.lvl}
       <div class="bar"><div style="width:${a.hp/a.max*100}%"></div></div>
       <button onclick="feedAunt(${i})">Doyur</button>
       <button onclick="upgradeAunt(${i})">Güncelle</button>
@@ -240,12 +173,12 @@ function render(){
   })
 
   pickles.innerHTML=""
-  state.pickles.forEach(p=>{
-    const left=(p.exp-Date.now())/(p.exp-(p.exp-86400000))*100
+  S.pickles.forEach(p=>{
+    const r=(p.exp-Date.now())/86400000*100
     pickles.innerHTML+=`
     <div class="card">
-      SKT: ${new Date(p.exp).toLocaleDateString()}
-      <div class="bar"><div style="width:${left}%"></div></div>
+      SKT ${new Date(p.exp).toLocaleDateString()}
+      <div class="bar"><div style="width:${r}%"></div></div>
     </div>`
   })
 }
