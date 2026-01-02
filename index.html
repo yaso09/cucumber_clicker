@@ -150,6 +150,18 @@ nav button{
   </div>
 </div>
 
+<!-- APK İndirme Popup -->
+<div id="apkModal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Uygulamayı indir</h3>
+    <div class="card">
+      <p>Bu oyunu Android cihazına yüklemek ister misin?</p>
+      <button onclick="window.location.href='/latest.apk'" style="text-align:center;">APK İndir</button>
+    </div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
 <script>
 const bgm=document.getElementById("bgm")
 const clickSound=document.getElementById("clickSound")
@@ -316,6 +328,14 @@ setInterval(()=>{
 function openModal(id){playClick();$(id).classList.remove("hidden")}
 function closeModals(){playClick();document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
 updateUI()
+
+// URL param kontrolü ve APK popup
+const params = new URLSearchParams(window.location.search);
+const isAndroid = /Android/i.test(navigator.userAgent);
+
+if (params.get("application") !== "true" && isAndroid) {
+  openModal("apkModal");
+}
 </script>
 
 </body>
