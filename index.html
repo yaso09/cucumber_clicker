@@ -14,128 +14,63 @@
   --accent:#4caf50;
   --text:#eaeaea;
 }
-
 *{box-sizing:border-box;user-select:none;font-family:system-ui}
 body{margin:0;background:var(--bg);color:var(--text)}
 
 header{
-  display:flex;
-  justify-content:space-around;
-  padding:12px;
-  padding-top: 2.6rem;
-  background:var(--panel);
-  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-around;
+  padding:12px;padding-top:2.6rem;
+  background:var(--panel);border-bottom:1px solid var(--border)
 }
-
 main{
   height:calc(100vh - 120px);
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display:flex;justify-content:center;align-items:center
 }
-
 #chop-area{
-  width:240px;height:240px;
-  position:relative;
-  background:var(--panel2);
-  border-radius:20px;
-  border:1px solid var(--border);
+  width:240px;height:240px;position:relative;
+  background:var(--panel2);border-radius:20px;
+  border:1px solid var(--border)
 }
-
 #knife{
-  position:absolute;
-  top:-60px;left:50%;
-  width:130px;
-  transform:translateX(-50%) rotate(-15deg);
+  position:absolute;top:-60px;left:50%;
+  width:130px;transform:translateX(-50%) rotate(-15deg)
 }
 #knife.chop{animation:chop .25s}
-@keyframes chop{
-  60%{transform:translateX(-50%) translateY(120px) rotate(25deg)}
-}
-
+@keyframes chop{60%{transform:translateX(-50%) translateY(120px) rotate(25deg)}}
 #cucumber{
-  position:absolute;
-  bottom:35px;left:50%;
-  width:180px;
-  transform:translateX(-50%);
+  position:absolute;bottom:35px;left:50%;
+  width:180px;transform:translateX(-50%)
 }
+nav{display:flex;background:var(--panel);border-top:1px solid var(--border)}
+nav button{flex:1;padding:12px;background:none;border:none;color:var(--text)}
 
-nav{
-  display:flex;
-  background:var(--panel);
-  border-top:1px solid var(--border);
-}
-nav button{
-  flex:1;
-  padding:12px;
-  background:none;
-  border:none;
-  color:var(--text);
-}
-
-.modal{
-  position:fixed;inset:0;
-  background:#000c;
-  padding:20px;
-  overflow:auto;
-}
+.modal{position:fixed;inset:0;background:#000c;padding:20px;overflow:auto}
 .hidden{display:none}
-
 .modal-box{
-  max-width:420px;
-  margin:auto;
-  background:var(--panel);
-  border-radius:16px;
-  padding:16px;
+  max-width:420px;margin:auto;background:var(--panel);
+  border-radius:16px;padding:16px
 }
-
 .card{
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px;
-  margin-bottom:12px;
+  background:var(--panel2);border:1px solid var(--border);
+  border-radius:12px;padding:12px;margin-bottom:12px
 }
-
 .card button{
-  width:100%;
-  margin-top:6px;
-  padding:8px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:#000;
-  font-weight:600;
+  width:100%;margin-top:6px;padding:8px;border:none;
+  border-radius:10px;background:var(--accent);
+  color:#000;font-weight:600
 }
-
 .close{
-  width:100%;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#333;
-  color:#fff;
+  width:100%;padding:10px;border:none;border-radius:10px;
+  background:#333;color:#fff
 }
-
-.bar{
-  height:6px;
-  background:#333;
-  border-radius:4px;
-  overflow:hidden;
-  margin-top:6px;
-}
-.bar div{
-  height:100%;
-  background:var(--accent);
-}
-
+.bar{height:6px;background:#333;border-radius:4px;overflow:hidden;margin-top:6px}
+.bar div{height:100%;background:var(--accent)}
 .inactive{opacity:.4}
 </style>
 </head>
 
 <body>
 
-<!-- SES -->
 <audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
 <audio id="clickSound" src="/assets/sounds/click.mp3"></audio>
 
@@ -160,23 +95,15 @@ nav button{
   <button onclick="openModal('bazaar')">Pazar</button>
 </nav>
 
-<!-- MARKET -->
 <div id="market" class="modal hidden">
   <div class="modal-box">
     <h3>Market</h3>
-    <div class="card">
-      Mini Fabrika
-      <button onclick="buyFactory()">100 💰</button>
-    </div>
-    <div class="card">
-      Turşucu Teyze
-      <button onclick="buyAunt()">150 💰</button>
-    </div>
+    <div class="card">Mini Fabrika<button onclick="buyFactory()">100 💰</button></div>
+    <div class="card">Turşucu Teyze<button onclick="buyAunt()">150 💰</button></div>
     <button class="close" onclick="closeModals()">Kapat</button>
   </div>
 </div>
 
-<!-- FACTORIES -->
 <div id="factories" class="modal hidden">
   <div class="modal-box">
     <h3>Fabrikalar</h3>
@@ -185,7 +112,6 @@ nav button{
   </div>
 </div>
 
-<!-- AUNTS -->
 <div id="aunts" class="modal hidden">
   <div class="modal-box">
     <h3>Teyzeler</h3>
@@ -194,54 +120,36 @@ nav button{
   </div>
 </div>
 
-<!-- PICKLE -->
 <div id="pickle" class="modal hidden">
   <div class="modal-box">
     <h3>Turşular</h3>
-    <div class="card">
-      10 🥒 → 1 🥫 (5 sn)
-      <button onclick="startPickle()">Kur</button>
-    </div>
     <div id="pickleList"></div>
     <button class="close" onclick="closeModals()">Kapat</button>
   </div>
 </div>
 
-<!-- BAZAAR -->
 <div id="bazaar" class="modal hidden">
   <div class="modal-box">
     <h3>Pazar</h3>
-    <div class="card">
-      10 🥒 = 2 💰
-      <button onclick="sellCucumbers(10)">Sat</button>
-    </div>
-    <div class="card">
-      1 🥫 = 3 💰
-      <button onclick="sellPickles(1)">Sat</button>
-    </div>
+    <div class="card">10 🥒 = 2 💰<button onclick="sellCucumbers(10)">Sat</button></div>
+    <div class="card">1 🥫 = 3 💰<button onclick="sellPickles(1)">Sat</button></div>
     <button class="close" onclick="closeModals()">Kapat</button>
   </div>
 </div>
 
 <script>
-/* SES */
 const bgm=document.getElementById("bgm")
 const clickSound=document.getElementById("clickSound")
 bgm.volume=.25;clickSound.volume=.6
-function playClick(){
-  clickSound.currentTime=0;clickSound.play()
-  if(bgm.paused) bgm.play()
-}
+function playClick(){clickSound.currentTime=0;clickSound.play();if(bgm.paused)bgm.play()}
 
-/* STATE */
 let state=JSON.parse(localStorage.salatalik||"{}")
 Object.assign(state,{
   cucumbers:state.cucumbers||0,
   money:state.money||0,
   factories:state.factories||[],
   aunts:state.aunts||[],
-  pickles:state.pickles||[],
-  pickleQueue:state.pickleQueue||[]
+  pickles:state.pickles||[]
 })
 
 const $=id=>document.getElementById(id)
@@ -254,30 +162,24 @@ function updateUI(){
   renderFactories();renderAunts();renderPickles()
 }
 
-/* CHOP */
 $("chop-area").onclick=()=>{
-  playClick()
-  state.cucumbers++
+  playClick();state.cucumbers++
   knife.classList.remove("chop");void knife.offsetWidth
   knife.classList.add("chop")
   save();updateUI()
 }
 
-/* BUY */
 function buyFactory(){
-  playClick()
-  if(state.money<100)return
+  playClick();if(state.money<100)return
   state.money-=100
   state.factories.push({lvl:1,hp:100,max:100,on:true})
 }
 function buyAunt(){
-  playClick()
-  if(state.money<150)return
+  playClick();if(state.money<150)return
   state.money-=150
-  state.aunts.push({lvl:1,hp:100,max:100})
+  state.aunts.push({lvl:1,hp:100,max:100,timer:0})
 }
 
-/* FACTORIES */
 function renderFactories(){
   factoryList.innerHTML=""
   state.factories.forEach((f,i)=>{
@@ -292,56 +194,38 @@ function renderFactories(){
   })
 }
 function toggleFactory(i){playClick();state.factories[i].on=!state.factories[i].on}
-function repairFactory(i){
-  if(state.money<20)return
-  state.money-=20
-  state.factories[i].hp=state.factories[i].max
-}
+function repairFactory(i){if(state.money<20)return;state.money-=20;state.factories[i].hp=state.factories[i].max}
 function upgradeFactory(i){
-  let f=state.factories[i]
-  let cost=f.lvl*50
-  if(state.money<cost)return
-  state.money-=cost
-  f.lvl++;f.max+=20;f.hp=f.max
+  let f=state.factories[i],c=f.lvl*50
+  if(state.money<c)return
+  state.money-=c;f.lvl++;f.max+=20;f.hp=f.max
 }
 
-/* AUNTS */
 function renderAunts(){
   auntList.innerHTML=""
   state.aunts.forEach((a,i)=>{
     auntList.innerHTML+=`
     <div class="card ${a.hp<=0?"inactive":""}">
-      Teyze #${i+1} | Seviye ${a.lvl}
+      Teyze #${i+1} | Seviye ${a.lvl}<br>
+      ${a.hp>0?"🥫 Üretiyor":"❌ Baygın"}
       <div class="bar"><div style="width:${a.hp/a.max*100}%"></div></div>
       <button onclick="feedAunt(${i})">Doyur (15 💰)</button>
       <button onclick="upgradeAunt(${i})">Güncelle (${a.lvl*40} 💰)</button>
     </div>`
   })
 }
-function feedAunt(i){
-  if(state.money<15)return
-  state.money-=15
-  state.aunts[i].hp=state.aunts[i].max
-}
+function feedAunt(i){if(state.money<15)return;state.money-=15;state.aunts[i].hp=state.aunts[i].max}
 function upgradeAunt(i){
-  let a=state.aunts[i]
-  let cost=a.lvl*40
-  if(state.money<cost)return
-  state.money-=cost
-  a.lvl++;a.max+=20;a.hp=a.max
+  let a=state.aunts[i],c=a.lvl*40
+  if(state.money<c)return
+  state.money-=c;a.lvl++;a.max+=20;a.hp=a.max
 }
 
-/* PICKLE */
 function randomExpiry(){
   let now=Date.now()
   return{created:now,expires:now+(Math.random()*5+1)*86400000,spoiled:false}
 }
-function startPickle(){
-  playClick()
-  if(state.cucumbers<10)return
-  state.cucumbers-=10
-  state.pickleQueue.push({t:5})
-}
+
 function renderPickles(){
   pickleList.innerHTML=""
   state.pickles.forEach(p=>{
@@ -355,13 +239,7 @@ function renderPickles(){
   })
 }
 
-/* SELL */
-function sellCucumbers(n){
-  playClick()
-  if(state.cucumbers<n)return
-  state.cucumbers-=n
-  state.money+=n*0.2
-}
+function sellCucumbers(n){playClick();if(state.cucumbers<n)return;state.cucumbers-=n;state.money+=n*0.2}
 function sellPickles(n){
   playClick()
   let good=state.pickles.filter(p=>!p.spoiled)
@@ -370,27 +248,24 @@ function sellPickles(n){
   state.money+=n*3
 }
 
-/* TICK */
 setInterval(()=>{
   state.factories.forEach(f=>{
-    if(f.on && f.hp>0){
-      state.cucumbers+=f.lvl
-      f.hp--
-    }
+    if(f.on&&f.hp>0){state.cucumbers+=f.lvl;f.hp--}
   })
+
   state.aunts.forEach(a=>{
-    if(a.hp>0)a.hp-=.5
-  })
-  state.pickleQueue.forEach((p,i)=>{
-    p.t--
-    if(p.t<=0){
+    if(a.hp<=0)return
+    a.hp-=0.3
+    a.timer++
+    let need=Math.max(2,8-a.lvl)
+    if(a.timer>=need && state.cucumbers>=10){
+      state.cucumbers-=10
       state.pickles.push(randomExpiry())
-      state.pickleQueue.splice(i,1)
+      a.timer=0
     }
   })
-  state.pickles.forEach(p=>{
-    if(!p.spoiled && Date.now()>p.expires)p.spoiled=true
-  })
+
+  state.pickles.forEach(p=>{if(!p.spoiled&&Date.now()>p.expires)p.spoiled=true})
   save();updateUI()
 },1000)
 
