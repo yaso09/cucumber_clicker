@@ -336,6 +336,9 @@ const isAndroid = /Android/i.test(navigator.userAgent);
 if (params.get("application") !== "true" && isAndroid) {
   openModal("apkModal");
 }
+
+if (params.get("application") !== "true")
+  document.querySelector("header").style.paddingTop = "12px";
 </script>
 
 </body>
