@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salatalık Doğra</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  user-select: none;
+  touch-action: manipulation;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0f0f0f;
+  color: #fff;
+}
+
+/* ===== LAYOUT ===== */
+#game {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: #1b1b1b;
+  font-weight: bold;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== CHOP AREA ===== */
+#chop-area {
+  position: relative;
+  width: 260px;
+  height: 260px;
+}
+
+/* Knife */
+#knife {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  width: 130px;
+  transform: translateX(-50%);
+  transform-origin: center;
+  z-index: 10;
+}
+
+#knife.chop {
+  animation: knifeBetterChop 0.22s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes knifeBetterChop {
+  0%   { transform: translateX(-50%) translateY(0) rotate(-12deg); }
+  60%  { transform: translateX(-50%) translateY(130px) rotate(25deg); }
+  100% { transform: translateX(-50%) translateY(0) rotate(-12deg); }
+}
+
+/* Cucumber base */
+#cucumber {
+  position: absolute;
+  bottom: 35px;
+  left: 50%;
+  width: 190px;
+  transform: translateX(-50%);
+}
+
+/* Falling slice */
+.slice {
+  position: absolute;
+  width: 40px;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: sliceFall 0.8s ease-out forwards;
+}
+
+@keyframes sliceFall {
+  0% {
+    transform: translateX(-50%) translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(-50% + var(--x))) translateY(160px) rotate(var(--r));
+    opacity: 0;
+  }
+}
+
+/* ===== NAV ===== */
+nav {
+  display: flex;
+  padding: 10px;
+  background: #1b1b1b;
+}
+
+nav button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  background: #2a2a2a;
+  color: #fff;
+  font-size: 16px;
+}
+
+/* ===== MODAL ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: #0f0f0ff2;
+  padding: 20px;
+}
+
+.hidden { display: none; }
+
+.item {
+  display: flex;
+  gap: 12px;
+  background: #1f1f1f;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.item img { width: 64px; }
+
+.close {
+  width: 100%;
+  padding: 12px;
+  background: #444;
+  border: none;
+  color: white;
+  border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<header>
+  <div>🥒 <span id="cucumberCount">0</span></div>
+  <div>Click: <span id="perClick">1</span></div>
+</header>
+
+<main>
+  <div id="chop-area">
+    <img id="knife" src="/assets/images/knife_basic.svg">
+    <img id="cucumber" src="/assets/images/cucumber.svg">
+  </div>
+</main>
+
+<nav>
+  <button onclick="openModal('market')">🛒 Market</button>
+  <button onclick="openModal('factory')">🏭 Fabrika</button>
+</nav>
+
+</div>
+
+<!-- MARKET -->
+<div id="market" class="modal hidden">
+  <h2>Market</h2>
+
+  <div class="item">
+    <img src="/assets/images/knife_gold.svg">
+    <div>
+      <strong>Altın Bıçak</strong>
+      <p>+3 / tık</p>
+      <button onclick="buyGoldKnife()">100</button>
+    </div>
+  </div>
+
+  <div class="item">
+    <img src="/assets/images/knife_cleaver.svg">
+    <div>
+      <strong>Satır</strong>
+      <p>+7 / tık</p>
+      <button onclick="buyCleaverKnife()">300</button>
+    </div>
+  </div>
+
+  <button class="close" onclick="closeModals()">Kapat</button>
+</div>
+
+<!-- FACTORY -->
+<div id="factory" class="modal hidden">
+  <h2>Fabrika</h2>
+
+  <div class="item">
+    <img src="/assets/images/factory.svg">
+    <div>
+      <strong>Mini Fabrika</strong>
+      <p>+1 / saniye</p>
+      <button onclick="buyFactory()">150</button>
+    </div>
+  </div>
+
+  <button class="close" onclick="closeModals()">Kapat</button>
+</div>
+
+<script>
+let state = JSON.parse(localStorage.getItem("salatalik")) || {
+  cucumbers: 0,
+  perClick: 1,
+  perSecond: 0,
+  knife: "basic"
+};
+
+const cucumberEl = document.getElementById("cucumberCount");
+const perClickEl = document.getElementById("perClick");
+const knife = document.getElementById("knife");
+const chopArea = document.getElementById("chop-area");
+
+function save() {
+  localStorage.setItem("salatalik", JSON.stringify(state));
+}
+
+function updateUI() {
+  cucumberEl.textContent = Math.floor(state.cucumbers);
+  perClickEl.textContent = state.perClick;
+  knife.src = `/assets/images/knife_${state.knife}.svg`;
+}
+
+/* ===== CHOP LOGIC ===== */
+chopArea.addEventListener("click", () => {
+  state.cucumbers += state.perClick;
+  playKnifeAnimation();
+  spawnSlices(state.perClick);
+  save();
+  updateUI();
+});
+
+function playKnifeAnimation() {
+  knife.classList.remove("chop");
+  void knife.offsetWidth; // restart animation
+  knife.classList.add("chop");
+}
+
+/* ===== SLICE SPAWN ===== */
+function spawnSlices(count) {
+  for (let i = 0; i < Math.min(count, 6); i++) {
+    const slice = document.createElement("img");
+    slice.src = "/assets/images/cucumber.svg";
+    slice.className = "slice";
+
+    slice.style.setProperty("--x", `${Math.random() * 120 - 60}px`);
+    slice.style.setProperty("--r", `${Math.random() * 180 - 90}deg`);
+
+    chopArea.appendChild(slice);
+
+    setTimeout(() => slice.remove(), 800);
+  }
+}
+
+/* ===== SHOP ===== */
+function buyGoldKnife() {
+  if (state.cucumbers >= 100 && state.knife === "basic") {
+    state.cucumbers -= 100;
+    state.perClick = 3;
+    state.knife = "gold";
+    save(); updateUI();
+  }
+}
+
+function buyCleaverKnife() {
+  if (state.cucumbers >= 300 && state.knife === "gold") {
+    state.cucumbers -= 300;
+    state.perClick = 7;
+    state.knife = "cleaver";
+    save(); updateUI();
+  }
+}
+
+function buyFactory() {
+  if (state.cucumbers >= 150) {
+    state.cucumbers -= 150;
+    state.perSecond += 1;
+    save(); updateUI();
+  }
+}
+
+setInterval(() => {
+  state.cucumbers += state.perSecond;
+  updateUI();
+}, 1000);
+
+/* ===== MODALS ===== */
+function openModal(id) {
+  document.getElementById(id).classList.remove("hidden");
+}
+function closeModals() {
+  document.querySelectorAll(".modal").forEach(m => m.classList.add("hidden"));
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
