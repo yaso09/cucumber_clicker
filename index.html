@@ -337,8 +337,10 @@ if (params.get("application") !== "true" && isAndroid) {
   openModal("apkModal");
 }
 
-if (params.get("application") !== "true")
+if (params.get("application") !== "true") {
   document.querySelector("header").style.paddingTop = "12px";
+  document.querySelector("nav").style.paddingBottom = "1.9rem";
+}
 </script>
 
 </body>
