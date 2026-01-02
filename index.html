@@ -24,30 +24,15 @@ nav button{flex:1;margin:0 5px;padding:12px;border-radius:14px;border:none;backg
 .hidden{display:none}
 .item{background:#1f1f1f;padding:12px;border-radius:12px;margin-bottom:12px}
 .factory{border:1px solid #333}
-.inactive{opacity:.5;filter:grayscale(1)}
+.inactive{opacity:.45;filter:grayscale(1)}
 .close{width:100%;padding:12px;background:#444;border:none;color:#fff;border-radius:10px}
 
 .bar{height:8px;background:#333;border-radius:4px;overflow:hidden;margin-top:6px}
-.bar div{height:100%;background:#4caf50}
-
-.jar{
-  font-size:36px;
-  text-align:center;
-  animation:shake .5s infinite;
-  margin:6px 0;
-}
-@keyframes shake{
-  0%{transform:rotate(0)}
-  25%{transform:rotate(4deg)}
-  50%{transform:rotate(0)}
-  75%{transform:rotate(-4deg)}
-}
+.bar div{height:100%;background:#4caf50;transition:width .4s}
 </style>
 </head>
 
 <body>
-
-<audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
 
 <div id="game">
 
@@ -72,6 +57,10 @@ nav button{flex:1;margin:0 5px;padding:12px;border-radius:14px;border:none;backg
   <button onclick="openModal('bazaar')">💰 Pazar</button>
 </nav>
 </div>
+
+<!-- SESLER -->
+<audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
+<audio id="clickSound" src="/assets/sounds/click.wav"></audio>
 
 <!-- MARKET -->
 <div id="market" class="modal hidden">
@@ -98,16 +87,17 @@ nav button{flex:1;margin:0 5px;padding:12px;border-radius:14px;border:none;backg
 
 <!-- AUNTS -->
 <div id="aunts" class="modal hidden">
-<h2>👵 Turşucu Teyzeler</h2>
+<h2>👵 Teyzeler</h2>
 <div id="auntList"></div>
 <button class="close" onclick="closeModals()">Kapat</button>
 </div>
 
 <!-- PICKLE -->
 <div id="pickle" class="modal hidden">
-<h2>🥫 Turşu Kuruluyor</h2>
+<h2>🥫 Turşular</h2>
 <p>10 🥒 → 1 🥫 (5 sn)</p>
 <button onclick="startPickle()">Turşu Kur</button>
+<hr>
 <div id="pickleList"></div>
 <button class="close" onclick="closeModals()">Kapat</button>
 </div>
@@ -130,103 +120,54 @@ Object.assign(state,{
   money:state.money||0,
   factories:state.factories||[],
   aunts:state.aunts||[],
-  pickles:state.pickles||0,
+  pickles:state.pickles||[],
   pickleQueue:state.pickleQueue||[]
 })
-
-const bgm=document.getElementById("bgm")
-document.body.addEventListener("click",()=>bgm.play(),{once:true})
 
 const countEl=document.getElementById("count")
 const moneyEl=document.getElementById("money")
 const pickleEl=document.getElementById("pickles")
-const factoryList=document.getElementById("factoryList")
-const auntList=document.getElementById("auntList")
 const pickleList=document.getElementById("pickleList")
 const knifeEl=document.getElementById("knife")
 const chopArea=document.getElementById("chop-area")
+
+const bgm=document.getElementById("bgm")
+const clickSound=document.getElementById("clickSound")
+bgm.volume=0.25
+clickSound.volume=0.6
+
+function playClick(){
+  clickSound.currentTime=0
+  clickSound.play()
+  if(bgm.paused) bgm.play()
+}
 
 function save(){localStorage.salatalik=JSON.stringify(state)}
 function updateUI(){
   countEl.textContent=Math.floor(state.cucumbers)
   moneyEl.textContent=Math.floor(state.money)
-  pickleEl.textContent=Math.floor(state.pickles)
+  pickleEl.textContent=state.pickles.filter(p=>!p.spoiled).length
 }
 
 /* CHOP */
 chopArea.onclick=()=>{
+  playClick()
   state.cucumbers++
   knifeEl.classList.remove("chop");void knifeEl.offsetWidth
   knifeEl.classList.add("chop")
   save();updateUI()
 }
 
-/* BUY */
-function buyFactory(){
-  if(state.money<100)return
-  state.money-=100
-  state.factories.push({level:1,power:1,health:100,maxHealth:100,upgradeCost:50,active:true})
-  save();updateFactories();updateUI()
-}
-function buyAunt(){
-  if(state.money<150)return
-  state.money-=150
-  state.aunts.push({level:1,power:.2,health:100,maxHealth:100,upgradeCost:70,active:true})
-  save();updateAunts();updateUI()
+/* RANDOM REAL DATE */
+function randomExpiry(){
+  const now=Date.now()
+  const days=(Math.random()*6+1)*24*60*60*1000
+  return {created:now,expires:now+days,spoiled:false}
 }
 
-/* LISTS */
-function updateFactories(){
-  factoryList.innerHTML=""
-  state.factories.forEach((f,i)=>{
-    const eff=f.health/f.maxHealth
-    const p=f.active?f.power*f.level*eff:0
-    factoryList.innerHTML+=`
-    <div class="item factory ${f.active?"":"inactive"}">
-      <b>Fabrika #${i+1} — Seviye ${f.level}</b>
-      <p>${p.toFixed(2)} 🥒/sn</p>
-      <div class="bar"><div style="width:${eff*100}%"></div></div>
-      <button onclick="toggleFactory(${i})">${f.active?"Kapat":"Aç"}</button>
-      <button onclick="upgradeFactory(${i})">Upgrade (${Math.floor(f.upgradeCost)})</button>
-    </div>`
-  })
-}
-function updateAunts(){
-  auntList.innerHTML=""
-  state.aunts.forEach((a,i)=>{
-    const eff=a.health/a.maxHealth
-    const p=a.active?a.power*a.level*eff:0
-    auntList.innerHTML+=`
-    <div class="item factory ${a.active?"":"inactive"}">
-      <b>👵 Teyze #${i+1} — Seviye ${a.level}</b>
-      <p>${p.toFixed(2)} 🥫/sn</p>
-      <div class="bar"><div style="width:${eff*100}%"></div></div>
-      <button onclick="toggleAunt(${i})">${a.active?"Kapat":"Aç"}</button>
-      <button onclick="upgradeAunt(${i})">Upgrade (${Math.floor(a.upgradeCost)})</button>
-    </div>`
-  })
-}
-
-/* TOGGLE + UPGRADE */
-function toggleFactory(i){state.factories[i].active=!state.factories[i].active;save();updateFactories()}
-function toggleAunt(i){state.aunts[i].active=!state.aunts[i].active;save();updateAunts()}
-function upgradeFactory(i){
-  let f=state.factories[i]
-  if(state.money<f.upgradeCost)return
-  state.money-=f.upgradeCost
-  f.level++;f.maxHealth+=20;f.health=f.maxHealth;f.upgradeCost*=1.6
-  save();updateFactories();updateUI()
-}
-function upgradeAunt(i){
-  let a=state.aunts[i]
-  if(state.money<a.upgradeCost)return
-  state.money-=a.upgradeCost
-  a.level++;a.maxHealth+=20;a.health=a.maxHealth;a.upgradeCost*=1.6
-  save();updateAunts();updateUI()
-}
-
-/* MANUAL PICKLE */
+/* PICKLE */
 function startPickle(){
+  playClick()
   if(state.cucumbers<10)return
   state.cucumbers-=10
   state.pickleQueue.push({time:5})
@@ -235,44 +176,63 @@ function startPickle(){
 
 /* SELL */
 function sellCucumbers(a){
+  playClick()
   if(state.cucumbers<a)return
   state.cucumbers-=a
   state.money+=a*.2
   save();updateUI()
 }
 function sellPickles(a){
-  if(state.pickles<a)return
-  state.pickles-=a
+  playClick()
+  const good=state.pickles.filter(p=>!p.spoiled)
+  if(good.length<a)return
+  for(let i=0;i<a;i++){
+    state.pickles.splice(state.pickles.indexOf(good[i]),1)
+  }
   state.money+=a*3
-  save();updateUI()
+  save();updateUI();updatePickleList()
+}
+
+/* PICKLE LIST */
+function updatePickleList(){
+  pickleList.innerHTML=""
+  state.pickles.forEach((p,i)=>{
+    const total=p.expires-p.created
+    const left=Math.max(0,p.expires-Date.now())
+    const percent=(left/total)*100
+    const date=new Date(p.expires).toLocaleDateString("tr-TR")
+
+    pickleList.innerHTML+=`
+    <div class="item ${p.spoiled?"inactive":""}">
+      🥫 Turşu #${i+1}<br>
+      SKT: ${date}<br>
+      ${p.spoiled?"❌ Bozuldu":""}
+      <div class="bar"><div style="width:${percent}%"></div></div>
+    </div>`
+  })
 }
 
 /* TICK */
 setInterval(()=>{
-  state.factories.forEach(f=>{
-    if(f.active){state.cucumbers+=f.power*f.level*(f.health/f.maxHealth);f.health-=.08}
-  })
-  state.aunts.forEach(a=>{
-    if(a.active){state.pickles+=a.power*a.level*(a.health/a.maxHealth);a.health-=.05}
-  })
-
-  pickleList.innerHTML=""
   state.pickleQueue.forEach((p,i)=>{
     p.time--
-    pickleList.innerHTML+=`<div class="jar">🥫 Turşu kuruluyor...</div>`
     if(p.time<=0){
-      state.pickles++
+      state.pickles.push(randomExpiry())
       state.pickleQueue.splice(i,1)
     }
   })
 
-  save();updateUI();updateFactories();updateAunts()
+  state.pickles.forEach(p=>{
+    if(!p.spoiled && Date.now()>p.expires)p.spoiled=true
+  })
+
+  save();updateUI();updatePickleList()
 },1000)
 
-function openModal(id){document.getElementById(id).classList.remove("hidden")}
-function closeModals(){document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
+function openModal(id){playClick();document.getElementById(id).classList.remove("hidden")}
+function closeModals(){playClick();document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
 
-updateUI();updateFactories();updateAunts()
+updateUI();updatePickleList()
 </script>
 </body>
 </html>
