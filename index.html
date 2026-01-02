@@ -73,7 +73,6 @@ nav button{
   color:var(--text);
 }
 
-/* MODAL */
 .modal{
   position:fixed;inset:0;
   background:#000c;
@@ -86,7 +85,6 @@ nav button{
   max-width:420px;
   margin:auto;
   background:var(--panel);
-  border:1px solid var(--border);
   border-radius:16px;
   padding:16px;
 }
@@ -101,8 +99,8 @@ nav button{
 
 .card button{
   width:100%;
-  margin-top:8px;
-  padding:10px;
+  margin-top:6px;
+  padding:8px;
   border:none;
   border-radius:10px;
   background:var(--accent);
@@ -129,16 +127,15 @@ nav button{
 .bar div{
   height:100%;
   background:var(--accent);
-  transition:width .4s;
 }
 
-.inactive{opacity:.45}
+.inactive{opacity:.4}
 </style>
 </head>
 
 <body>
 
-<!-- 🔊 SESLER -->
+<!-- SES -->
 <audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
 <audio id="clickSound" src="/assets/sounds/click.mp3"></audio>
 
@@ -168,13 +165,11 @@ nav button{
   <div class="modal-box">
     <h3>Market</h3>
     <div class="card">
-      <b>Mini Fabrika</b>
-      <p>1 🥒 / sn</p>
+      Mini Fabrika
       <button onclick="buyFactory()">100 💰</button>
     </div>
     <div class="card">
-      <b>Turşucu Teyze</b>
-      <p>0.2 🥫 / sn</p>
+      Turşucu Teyze
       <button onclick="buyAunt()">150 💰</button>
     </div>
     <button class="close" onclick="closeModals()">Kapat</button>
@@ -229,19 +224,16 @@ nav button{
 </div>
 
 <script>
-/* ===== SES ===== */
-const bgm = document.getElementById("bgm");
-const clickSound = document.getElementById("clickSound");
-bgm.volume = 0.25;
-clickSound.volume = 0.6;
-
+/* SES */
+const bgm=document.getElementById("bgm")
+const clickSound=document.getElementById("clickSound")
+bgm.volume=.25;clickSound.volume=.6
 function playClick(){
-  clickSound.currentTime = 0;
-  clickSound.play();
-  if(bgm.paused) bgm.play();
+  clickSound.currentTime=0;clickSound.play()
+  if(bgm.paused) bgm.play()
 }
 
-/* ===== STATE ===== */
+/* STATE */
 let state=JSON.parse(localStorage.salatalik||"{}")
 Object.assign(state,{
   cucumbers:state.cucumbers||0,
@@ -262,65 +254,90 @@ function updateUI(){
   renderFactories();renderAunts();renderPickles()
 }
 
-/* ===== CHOP ===== */
+/* CHOP */
 $("chop-area").onclick=()=>{
-  playClick();
+  playClick()
   state.cucumbers++
   knife.classList.remove("chop");void knife.offsetWidth
   knife.classList.add("chop")
   save();updateUI()
 }
 
-/* ===== BUY ===== */
+/* BUY */
 function buyFactory(){
-  playClick();
+  playClick()
   if(state.money<100)return
   state.money-=100
-  state.factories.push({on:true})
-  save();updateUI()
+  state.factories.push({lvl:1,hp:100,max:100,on:true})
 }
 function buyAunt(){
-  playClick();
+  playClick()
   if(state.money<150)return
   state.money-=150
-  state.aunts.push({})
-  save();updateUI()
+  state.aunts.push({lvl:1,hp:100,max:100})
 }
 
-/* ===== FACTORY ===== */
+/* FACTORIES */
 function renderFactories(){
   factoryList.innerHTML=""
   state.factories.forEach((f,i)=>{
     factoryList.innerHTML+=`
-    <div class="card">
-      Fabrika #${i+1}
-      <button onclick="toggleFactory(${i})">
-        ${f.on?"Kapat":"Aç"}
-      </button>
+    <div class="card ${f.hp<=0?"inactive":""}">
+      Fabrika #${i+1} | Seviye ${f.lvl}
+      <div class="bar"><div style="width:${f.hp/f.max*100}%"></div></div>
+      <button onclick="toggleFactory(${i})">${f.on?"Kapat":"Aç"}</button>
+      <button onclick="repairFactory(${i})">Tamir (20 💰)</button>
+      <button onclick="upgradeFactory(${i})">Güncelle (${f.lvl*50} 💰)</button>
     </div>`
   })
 }
-function toggleFactory(i){
-  playClick();
-  state.factories[i].on=!state.factories[i].on
-  save();updateUI()
+function toggleFactory(i){playClick();state.factories[i].on=!state.factories[i].on}
+function repairFactory(i){
+  if(state.money<20)return
+  state.money-=20
+  state.factories[i].hp=state.factories[i].max
+}
+function upgradeFactory(i){
+  let f=state.factories[i]
+  let cost=f.lvl*50
+  if(state.money<cost)return
+  state.money-=cost
+  f.lvl++;f.max+=20;f.hp=f.max
 }
 
-/* ===== AUNT ===== */
+/* AUNTS */
 function renderAunts(){
   auntList.innerHTML=""
-  state.aunts.forEach((_,i)=>{
-    auntList.innerHTML+=`<div class="card">Teyze #${i+1}</div>`
+  state.aunts.forEach((a,i)=>{
+    auntList.innerHTML+=`
+    <div class="card ${a.hp<=0?"inactive":""}">
+      Teyze #${i+1} | Seviye ${a.lvl}
+      <div class="bar"><div style="width:${a.hp/a.max*100}%"></div></div>
+      <button onclick="feedAunt(${i})">Doyur (15 💰)</button>
+      <button onclick="upgradeAunt(${i})">Güncelle (${a.lvl*40} 💰)</button>
+    </div>`
   })
 }
+function feedAunt(i){
+  if(state.money<15)return
+  state.money-=15
+  state.aunts[i].hp=state.aunts[i].max
+}
+function upgradeAunt(i){
+  let a=state.aunts[i]
+  let cost=a.lvl*40
+  if(state.money<cost)return
+  state.money-=cost
+  a.lvl++;a.max+=20;a.hp=a.max
+}
 
-/* ===== PICKLE ===== */
+/* PICKLE */
 function randomExpiry(){
-  const now=Date.now()
+  let now=Date.now()
   return{created:now,expires:now+(Math.random()*5+1)*86400000,spoiled:false}
 }
 function startPickle(){
-  playClick();
+  playClick()
   if(state.cucumbers<10)return
   state.cucumbers-=10
   state.pickleQueue.push({t:5})
@@ -328,8 +345,8 @@ function startPickle(){
 function renderPickles(){
   pickleList.innerHTML=""
   state.pickles.forEach(p=>{
-    const total=p.expires-p.created
-    const left=Math.max(0,p.expires-Date.now())
+    let total=p.expires-p.created
+    let left=Math.max(0,p.expires-Date.now())
     pickleList.innerHTML+=`
     <div class="card ${p.spoiled?"inactive":""}">
       SKT: ${new Date(p.expires).toLocaleDateString("tr")}
@@ -338,40 +355,47 @@ function renderPickles(){
   })
 }
 
-/* ===== SELL ===== */
+/* SELL */
 function sellCucumbers(n){
-  playClick();
+  playClick()
   if(state.cucumbers<n)return
   state.cucumbers-=n
   state.money+=n*0.2
 }
 function sellPickles(n){
-  playClick();
-  const good=state.pickles.filter(p=>!p.spoiled)
+  playClick()
+  let good=state.pickles.filter(p=>!p.spoiled)
   if(good.length<n)return
   state.pickles.splice(state.pickles.indexOf(good[0]),n)
   state.money+=n*3
 }
 
-/* ===== TICK ===== */
+/* TICK */
 setInterval(()=>{
-  state.factories.forEach(f=>{if(f.on)state.cucumbers++})
-  state.aunts.forEach(()=>{state.pickles.push(randomExpiry())})
-
+  state.factories.forEach(f=>{
+    if(f.on && f.hp>0){
+      state.cucumbers+=f.lvl
+      f.hp--
+    }
+  })
+  state.aunts.forEach(a=>{
+    if(a.hp>0)a.hp-=.5
+  })
   state.pickleQueue.forEach((p,i)=>{
-    p.t--;if(p.t<=0){
+    p.t--
+    if(p.t<=0){
       state.pickles.push(randomExpiry())
       state.pickleQueue.splice(i,1)
     }
   })
-
-  state.pickles.forEach(p=>{if(!p.spoiled&&Date.now()>p.expires)p.spoiled=true})
+  state.pickles.forEach(p=>{
+    if(!p.spoiled && Date.now()>p.expires)p.spoiled=true
+  })
   save();updateUI()
 },1000)
 
 function openModal(id){playClick();$(id).classList.remove("hidden")}
 function closeModals(){playClick();document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
-
 updateUI()
 </script>
 
