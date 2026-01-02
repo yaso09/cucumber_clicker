@@ -48,28 +48,25 @@ main {
   height: 260px;
 }
 
-/* Knife */
 #knife {
   position: absolute;
   top: -60px;
   left: 50%;
   width: 130px;
-  transform: translateX(-50%);
-  transform-origin: center;
-  z-index: 10;
+  transform: translateX(-50%) rotate(-12deg);
+  z-index: 1;
 }
 
 #knife.chop {
-  animation: knifeBetterChop 0.22s cubic-bezier(.2,.8,.2,1);
+  animation: knifeChop 0.25s cubic-bezier(.2,.8,.2,1);
 }
 
-@keyframes knifeBetterChop {
+@keyframes knifeChop {
   0%   { transform: translateX(-50%) translateY(0) rotate(-12deg); }
   60%  { transform: translateX(-50%) translateY(130px) rotate(25deg); }
   100% { transform: translateX(-50%) translateY(0) rotate(-12deg); }
 }
 
-/* Cucumber base */
 #cucumber {
   position: absolute;
   bottom: 35px;
@@ -78,23 +75,17 @@ main {
   transform: translateX(-50%);
 }
 
-/* Falling slice */
 .slice {
   position: absolute;
   width: 40px;
   bottom: 60px;
   left: 50%;
   transform: translateX(-50%);
-  pointer-events: none;
   animation: sliceFall 0.8s ease-out forwards;
 }
 
 @keyframes sliceFall {
-  0% {
-    transform: translateX(-50%) translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
+  to {
     transform: translateX(calc(-50% + var(--x))) translateY(160px) rotate(var(--r));
     opacity: 0;
   }
@@ -122,22 +113,42 @@ nav button {
 .modal {
   position: fixed;
   inset: 0;
-  background: #0f0f0ff2;
+  background: #0f0f0ff5;
   padding: 20px;
+  z-index: 100;
+  overflow-y: auto;
 }
 
 .hidden { display: none; }
 
 .item {
-  display: flex;
-  gap: 12px;
   background: #1f1f1f;
   padding: 12px;
   border-radius: 12px;
   margin-bottom: 12px;
 }
 
-.item img { width: 64px; }
+.factory {
+  border: 1px solid #333;
+}
+
+.bar {
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.bar > div {
+  height: 100%;
+  background: #4caf50;
+}
+
+.factory button {
+  margin-top: 6px;
+  margin-right: 6px;
+}
 
 .close {
   width: 100%;
@@ -147,15 +158,23 @@ nav button {
   color: white;
   border-radius: 10px;
 }
+
+/* ===== GRAPH ===== */
+canvas {
+  width: 100%;
+  height: 120px;
+  background: #111;
+  border-radius: 10px;
+  margin-top: 10px;
+}
 </style>
 </head>
 
 <body>
-
 <div id="game">
 
 <header>
-  <div>🥒 <span id="cucumberCount">0</span></div>
+  <div>🥒 <span id="count">0</span></div>
   <div>Click: <span id="perClick">1</span></div>
 </header>
 
@@ -168,137 +187,206 @@ nav button {
 
 <nav>
   <button onclick="openModal('market')">🛒 Market</button>
-  <button onclick="openModal('factory')">🏭 Fabrika</button>
+  <button onclick="openModal('factories')">🏭 Fabrikalar</button>
 </nav>
 
 </div>
 
-<!-- MARKET -->
+<!-- ===== MARKET ===== -->
 <div id="market" class="modal hidden">
   <h2>Market</h2>
 
   <div class="item">
-    <img src="/assets/images/knife_gold.svg">
-    <div>
-      <strong>Altın Bıçak</strong>
-      <p>+3 / tık</p>
-      <button onclick="buyGoldKnife()">100</button>
-    </div>
-  </div>
-
-  <div class="item">
-    <img src="/assets/images/knife_cleaver.svg">
-    <div>
-      <strong>Satır</strong>
-      <p>+7 / tık</p>
-      <button onclick="buyCleaverKnife()">300</button>
-    </div>
+    <strong>Mini Fabrika</strong>
+    <p>Üretim: 1/sn | Can: 100</p>
+    <button onclick="buyFactory()">150 🥒</button>
   </div>
 
   <button class="close" onclick="closeModals()">Kapat</button>
 </div>
 
-<!-- FACTORY -->
-<div id="factory" class="modal hidden">
-  <h2>Fabrika</h2>
+<!-- ===== FACTORIES ===== -->
+<div id="factories" class="modal hidden">
+  <h2>Fabrikalarım</h2>
+  <div id="factoryList"></div>
 
-  <div class="item">
-    <img src="/assets/images/factory.svg">
-    <div>
-      <strong>Mini Fabrika</strong>
-      <p>+1 / saniye</p>
-      <button onclick="buyFactory()">150</button>
-    </div>
-  </div>
+  <h3>Verim Grafiği</h3>
+  <canvas id="chart"></canvas>
 
   <button class="close" onclick="closeModals()">Kapat</button>
 </div>
 
 <script>
+/* ===== STATE ===== */
 let state = JSON.parse(localStorage.getItem("salatalik")) || {
   cucumbers: 0,
   perClick: 1,
-  perSecond: 0,
-  knife: "basic"
+  knife: "basic",
+  factories: [],
+  factoryId: 0
 };
 
-const cucumberEl = document.getElementById("cucumberCount");
-const perClickEl = document.getElementById("perClick");
-const knife = document.getElementById("knife");
-const chopArea = document.getElementById("chop-area");
+/* MIGRATION */
+if (!Array.isArray(state.factories)) state.factories = [];
+if (typeof state.factoryId !== "number") state.factoryId = 0;
 
+/* ===== ELEMENTS ===== */
+const countEl = document.getElementById("count");
+const perClickEl = document.getElementById("perClick");
+const knifeEl = document.getElementById("knife");
+const chopArea = document.getElementById("chop-area");
+const factoryList = document.getElementById("factoryList");
+const chart = document.getElementById("chart");
+const ctx = chart.getContext("2d");
+
+let efficiencyLog = [];
+
+/* ===== CORE ===== */
 function save() {
   localStorage.setItem("salatalik", JSON.stringify(state));
 }
 
 function updateUI() {
-  cucumberEl.textContent = Math.floor(state.cucumbers);
+  countEl.textContent = Math.floor(state.cucumbers);
   perClickEl.textContent = state.perClick;
-  knife.src = `/assets/images/knife_${state.knife}.svg`;
+  knifeEl.src = `/assets/images/knife_${state.knife}.svg`;
 }
 
-/* ===== CHOP LOGIC ===== */
-chopArea.addEventListener("click", () => {
+/* ===== CHOP ===== */
+chopArea.onclick = () => {
+  if (document.querySelector(".modal:not(.hidden)")) return;
+
   state.cucumbers += state.perClick;
-  playKnifeAnimation();
-  spawnSlices(state.perClick);
+  knifeEl.classList.remove("chop");
+  void knifeEl.offsetWidth;
+  knifeEl.classList.add("chop");
+  spawnSlice();
   save();
   updateUI();
-});
+};
 
-function playKnifeAnimation() {
-  knife.classList.remove("chop");
-  void knife.offsetWidth; // restart animation
-  knife.classList.add("chop");
+function spawnSlice() {
+  const s = document.createElement("img");
+  s.src = "/assets/images/slice.svg";
+  s.className = "slice";
+  s.style.setProperty("--x", `${Math.random()*120-60}px`);
+  s.style.setProperty("--r", `${Math.random()*180-90}deg`);
+  chopArea.appendChild(s);
+  setTimeout(() => s.remove(), 800);
 }
 
-/* ===== SLICE SPAWN ===== */
-function spawnSlices(count) {
-  for (let i = 0; i < Math.min(count, 6); i++) {
-    const slice = document.createElement("img");
-    slice.src = "/assets/images/cucumber.svg";
-    slice.className = "slice";
-
-    slice.style.setProperty("--x", `${Math.random() * 120 - 60}px`);
-    slice.style.setProperty("--r", `${Math.random() * 180 - 90}deg`);
-
-    chopArea.appendChild(slice);
-
-    setTimeout(() => slice.remove(), 800);
-  }
-}
-
-/* ===== SHOP ===== */
-function buyGoldKnife() {
-  if (state.cucumbers >= 100 && state.knife === "basic") {
-    state.cucumbers -= 100;
-    state.perClick = 3;
-    state.knife = "gold";
-    save(); updateUI();
-  }
-}
-
-function buyCleaverKnife() {
-  if (state.cucumbers >= 300 && state.knife === "gold") {
-    state.cucumbers -= 300;
-    state.perClick = 7;
-    state.knife = "cleaver";
-    save(); updateUI();
-  }
-}
-
+/* ===== FACTORIES ===== */
 function buyFactory() {
-  if (state.cucumbers >= 150) {
-    state.cucumbers -= 150;
-    state.perSecond += 1;
-    save(); updateUI();
-  }
+  if (state.cucumbers < 150) return;
+
+  state.cucumbers -= 150;
+  state.factories.push({
+    id: ++state.factoryId,
+    level: 1,
+    power: 1,
+    health: 100,
+    maxHealth: 100,
+    wearRate: 6,
+    wearTimer: 0
+  });
+
+  save();
+  updateUI();
+  updateFactories();
 }
 
-setInterval(() => {
-  state.cucumbers += state.perSecond;
+function repairFactory(id) {
+  const f = state.factories.find(x => x.id === id);
+  if (!f) return;
+
+  const cost = Math.ceil((f.maxHealth - f.health) / 2);
+  if (state.cucumbers < cost || cost <= 0) return;
+
+  state.cucumbers -= cost;
+  f.health = f.maxHealth;
+  save();
   updateUI();
+  updateFactories();
+}
+
+function upgradeFactory(id) {
+  const f = state.factories.find(x => x.id === id);
+  if (!f) return;
+
+  const cost = f.level * 100;
+  if (state.cucumbers < cost) return;
+
+  state.cucumbers -= cost;
+  f.level++;
+  f.power++;
+  f.maxHealth += 50;
+  f.health = f.maxHealth;
+  f.wearRate += 2;
+
+  save();
+  updateUI();
+  updateFactories();
+}
+
+function updateFactories() {
+  factoryList.innerHTML = "";
+
+  state.factories.forEach(f => {
+    const percent = (f.health / f.maxHealth) * 100;
+    const div = document.createElement("div");
+    div.className = "item factory";
+    div.innerHTML = `
+      <strong>Fabrika #${f.id} (Lv ${f.level})</strong>
+      <p>Üretim: ${f.power}/sn</p>
+      <p>Can: ${Math.floor(f.health)} / ${f.maxHealth}</p>
+      <div class="bar"><div style="width:${percent}%"></div></div>
+      <button onclick="repairFactory(${f.id})">Tamir</button>
+      <button onclick="upgradeFactory(${f.id})">Upgrade</button>
+    `;
+    factoryList.appendChild(div);
+  });
+}
+
+/* ===== FACTORY TICK ===== */
+setInterval(() => {
+  let total = 0;
+
+  state.factories.forEach(f => {
+    if (f.health > 0) {
+      state.cucumbers += f.power;
+      f.wearTimer++;
+      if (f.wearTimer >= f.wearRate) {
+        f.health -= 1;
+        f.wearTimer = 0;
+      }
+      total += f.power;
+    }
+  });
+
+  efficiencyLog.push(total);
+  if (efficiencyLog.length > 40) efficiencyLog.shift();
+  drawChart();
+
+  updateUI();
+  updateFactories();
+  save();
 }, 1000);
+
+/* ===== GRAPH ===== */
+function drawChart() {
+  chart.width = chart.clientWidth;
+  chart.height = chart.clientHeight;
+  ctx.clearRect(0,0,chart.width,chart.height);
+  ctx.strokeStyle = "#4caf50";
+  ctx.beginPath();
+
+  efficiencyLog.forEach((v,i)=>{
+    const x = i * (chart.width / efficiencyLog.length);
+    const y = chart.height - v * 10;
+    ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
 
 /* ===== MODALS ===== */
 function openModal(id) {
@@ -308,8 +396,9 @@ function closeModals() {
   document.querySelectorAll(".modal").forEach(m => m.classList.add("hidden"));
 }
 
+/* INIT */
 updateUI();
+updateFactories();
 </script>
-
 </body>
 </html>
