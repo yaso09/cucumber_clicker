@@ -7,12 +7,15 @@
 
 <style>
 :root{
-  --bg:#0e0e0e;--panel:#181818;--panel2:#202020;
-  --border:#2c2c2c;--accent:#4caf50;--text:#eaeaea;
+  --bg:#0e0e0e;
+  --panel:#181818;
+  --panel2:#202020;
+  --border:#2c2c2c;
+  --accent:#4caf50;
+  --text:#eaeaea;
 }
 *{box-sizing:border-box;user-select:none;font-family:system-ui}
 body{margin:0;background:var(--bg);color:var(--text)}
-
 header{
   display:flex;justify-content:space-around;
   padding:12px;padding-top:2.6rem;
@@ -44,24 +47,52 @@ nav button{flex:1;padding:12px;background:none;border:none;color:var(--text)}
 
 .modal{position:fixed;inset:0;background:#000c;padding:20px;overflow:auto}
 .hidden{display:none}
-.modal-box{max-width:420px;margin:auto;background:var(--panel);border-radius:16px;padding:16px}
-.card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px}
+.modal-box{
+  max-width:420px;margin:auto;background:var(--panel);
+  border-radius:16px;padding:16px
+}
+.card{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:12px
+}
 .card button{
-  width:100%;margin-top:6px;padding:8px;
-  border:none;border-radius:10px;
-  background:var(--accent);color:#000;font-weight:600
+  width:100%;
+  margin-top:6px;
+  padding:8px;
+  border:none;
+  border-radius:10px;
+  background:var(--accent);
+  color:#000;
+  font-weight:600
 }
 .close{
-  width:100%;padding:10px;border:none;border-radius:10px;
-  background:#333;color:#fff
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#333;
+  color:#fff
 }
-.bar{height:6px;background:#333;border-radius:4px;overflow:hidden;margin-top:6px}
+.bar{
+  height:6px;
+  background:#333;
+  border-radius:4px;
+  overflow:hidden;
+  margin-top:6px
+}
 .bar div{height:100%;background:var(--accent)}
 .inactive{opacity:.4}
 </style>
 </head>
 
 <body>
+
+<!-- SES -->
+<audio id="bgm" src="/assets/sounds/background.mp3" loop></audio>
+<audio id="clickSound" src="/assets/sounds/click.mp3"></audio>
 
 <header>
   <div>🥒 <span id="count">0</span></div>
@@ -78,15 +109,27 @@ nav button{flex:1;padding:12px;background:none;border:none;color:var(--text)}
 
 <nav>
   <button onclick="openModal('market')">Market</button>
+  <button onclick="openModal('factories')">Fabrikalar</button>
   <button onclick="openModal('aunts')">Teyzeler</button>
   <button onclick="openModal('pickle')">Turşu</button>
+  <button onclick="openModal('bazaar')">Pazar</button>
 </nav>
 
 <!-- MARKET -->
 <div id="market" class="modal hidden">
   <div class="modal-box">
     <h3>Market</h3>
+    <div class="card">Mini Fabrika<button onclick="buyFactory()">100 💰</button></div>
     <div class="card">Turşucu Teyze<button onclick="buyAunt()">150 💰</button></div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
+<!-- FACTORIES -->
+<div id="factories" class="modal hidden">
+  <div class="modal-box">
+    <h3>Fabrikalar</h3>
+    <div id="factoryList"></div>
     <button class="close" onclick="closeModals()">Kapat</button>
   </div>
 </div>
@@ -103,7 +146,7 @@ nav button{flex:1;padding:12px;background:none;border:none;color:var(--text)}
 <!-- PICKLE -->
 <div id="pickle" class="modal hidden">
   <div class="modal-box">
-    <h3>Turşu Kur</h3>
+    <h3>Turşular</h3>
     <div class="card">
       10 🥒 → 1 🥫 (5 sn)
       <button onclick="startPickle()">Kur</button>
@@ -113,12 +156,33 @@ nav button{flex:1;padding:12px;background:none;border:none;color:var(--text)}
   </div>
 </div>
 
+<!-- BAZAAR -->
+<div id="bazaar" class="modal hidden">
+  <div class="modal-box">
+    <h3>Pazar</h3>
+    <div class="card">10 🥒 = 2 💰<button onclick="sellCucumbers(10)">Sat</button></div>
+    <div class="card">1 🥫 = 3 💰<button onclick="sellPickles(1)">Sat</button></div>
+    <button class="close" onclick="closeModals()">Kapat</button>
+  </div>
+</div>
+
 <script>
+/* ===== SES ===== */
+const bgm=document.getElementById("bgm")
+const clickSound=document.getElementById("clickSound")
+bgm.volume=.25;clickSound.volume=.6
+function playClick(){
+  clickSound.currentTime=0
+  clickSound.play()
+  if(bgm.paused) bgm.play()
+}
+
 /* ===== STATE ===== */
 let state=JSON.parse(localStorage.salatalik||"{}")
 Object.assign(state,{
   cucumbers:state.cucumbers||0,
   money:state.money||0,
+  factories:state.factories||[],
   aunts:state.aunts||[],
   pickles:state.pickles||[],
   pickleQueue:state.pickleQueue||[]
@@ -131,24 +195,47 @@ function updateUI(){
   count.textContent=Math.floor(state.cucumbers)
   money.textContent=Math.floor(state.money)
   pickles.textContent=state.pickles.filter(p=>!p.spoiled).length
-  renderAunts();renderPickles()
+  renderFactories();renderAunts();renderPickles()
 }
 
 /* ===== CHOP ===== */
 $("chop-area").onclick=()=>{
+  playClick()
   state.cucumbers++
   knife.classList.remove("chop");void knife.offsetWidth
   knife.classList.add("chop")
   save();updateUI()
 }
 
-/* ===== AUNT ===== */
+/* ===== MARKET ===== */
+function buyFactory(){
+  playClick()
+  if(state.money<100)return
+  state.money-=100
+  state.factories.push({lvl:1,hp:100,max:100,on:true})
+}
 function buyAunt(){
+  playClick()
   if(state.money<150)return
   state.money-=150
   state.aunts.push({lvl:1,hp:100,max:100,timer:0})
 }
 
+/* ===== FACTORIES ===== */
+function renderFactories(){
+  factoryList.innerHTML=""
+  state.factories.forEach((f,i)=>{
+    factoryList.innerHTML+=`
+    <div class="card ${f.hp<=0?"inactive":""}">
+      Fabrika #${i+1} | Lv ${f.lvl}
+      <div class="bar"><div style="width:${f.hp/f.max*100}%"></div></div>
+      <button onclick="toggleFactory(${i})">${f.on?"Kapat":"Aç"}</button>
+    </div>`
+  })
+}
+function toggleFactory(i){playClick();state.factories[i].on=!state.factories[i].on}
+
+/* ===== AUNTS ===== */
 function renderAunts(){
   auntList.innerHTML=""
   state.aunts.forEach((a,i)=>{
@@ -163,9 +250,10 @@ function renderAunts(){
 /* ===== PICKLE ===== */
 function randomExpiry(){
   let now=Date.now()
-  return{created:now,expires:now+Math.random()*5*86400000+86400000,spoiled:false}
+  return{created:now,expires:now+(Math.random()*5+1)*86400000,spoiled:false}
 }
 function startPickle(){
+  playClick()
   if(state.cucumbers<10)return
   state.cucumbers-=10
   state.pickleQueue.push({t:5})
@@ -183,11 +271,33 @@ function renderPickles(){
   })
 }
 
+/* ===== PAZAR ===== */
+function sellCucumbers(n){
+  playClick()
+  if(state.cucumbers<n)return
+  state.cucumbers-=n
+  state.money+=n*0.2
+}
+function sellPickles(n){
+  playClick()
+  let good=state.pickles.filter(p=>!p.spoiled)
+  if(good.length<n)return
+  state.pickles.splice(state.pickles.indexOf(good[0]),n)
+  state.money+=n*3
+}
+
 /* ===== TICK ===== */
 setInterval(()=>{
+  state.factories.forEach(f=>{
+    if(f.on && f.hp>0){
+      state.cucumbers+=f.lvl
+      f.hp--
+    }
+  })
+
   state.aunts.forEach(a=>{
     if(a.hp<=0)return
-    a.hp-=0.2
+    a.hp-=0.3
     a.timer++
     if(a.timer>=6 && state.cucumbers>=10){
       state.cucumbers-=10
@@ -211,10 +321,11 @@ setInterval(()=>{
   save();updateUI()
 },1000)
 
-/* ===== MODAL ===== */
-function openModal(id){$(id).classList.remove("hidden")}
-function closeModals(){document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
-
+function openModal(id){playClick();$(id).classList.remove("hidden")}
+function closeModals(){
+  playClick()
+  document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))
+}
 updateUI()
 </script>
 
