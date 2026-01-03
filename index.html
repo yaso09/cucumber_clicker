@@ -55,6 +55,10 @@ button{
   <p>Hoş geldin! Bu oyunla salatalıkları doğra, turşu yap ve pazarını büyüt!</p>
   <button onclick="startGame()">Oyunu Başlat</button>
   <button class="hidden" onclick="openApkModal()">APK İndir</button>
+
+  <!-- YENİ EKLENEN TUŞLAR -->
+  <button onclick="sellAllCucumbers()">🥒 Bütün Salatalıkları Sat</button>
+  <button onclick="sellAllPickles()">🥫 Bütün Turşuları Sat</button>
 </main>
 
 <!-- APK İndirme Popup -->
@@ -86,13 +90,22 @@ function closeModals(){
 // Oyunu başlat (oyun sayfasına yönlendirecek ve application parametresini koruyacak)
 function startGame(){
   const params = new URLSearchParams(window.location.search);
-  let url = "/game.html"; // oyun sayfanın yolu
+  let url = "/game.html";
   
   if(params.get("application") === "true"){
     url += "?application=true";
   }
   
   window.location.href = url;
+}
+
+/* YENİ EKLENEN FONKSİYONLAR */
+function sellAllCucumbers(){
+  alert("Bütün salatalıklar satıldı!");
+}
+
+function sellAllPickles(){
+  alert("Bütün turşular satıldı!");
 }
 </script>
 
