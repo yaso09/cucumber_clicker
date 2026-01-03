@@ -144,19 +144,34 @@ nav button{
 <div id="bazaar" class="modal hidden">
   <div class="modal-box">
     <h3>Pazar</h3>
-    <div class="card">10 🥒 = 2 💰<button onclick="sellCucumbers(10)">Sat</button></div>
-    <div class="card">1 🥫 = 3 💰<button onclick="sellPickles(1)">Sat</button></div>
+
+    <div class="card">10 🥒 = 2 💰
+      <button onclick="sellCucumbers(10)">Sat</button>
+    </div>
+
+    <div class="card">1 🥫 = 3 💰
+      <button onclick="sellPickles(1)">Sat</button>
+    </div>
+
+    <!-- YENİ BUTONLAR -->
+    <div class="card">
+      <button onclick="sellAllCucumbers()">🥒 Bütün Salatalıkları Sat</button>
+    </div>
+
+    <div class="card">
+      <button onclick="sellAllPickles()">🥫 Bütün Turşuları Sat</button>
+    </div>
+
     <button class="close" onclick="closeModals()">Kapat</button>
   </div>
 </div>
 
-<!-- APK İndirme Popup -->
 <div id="apkModal" class="modal hidden">
   <div class="modal-box">
     <h3>Uygulamayı indir</h3>
     <div class="card">
       <p>Bu oyunu Android cihazına yüklemek ister misin?</p>
-      <button onclick="window.location.href='/latest.apk'" style="text-align:center;">APK İndir</button>
+      <button onclick="window.location.href='/latest.apk'">APK İndir</button>
     </div>
     <button class="close" onclick="closeModals()">Kapat</button>
   </div>
@@ -296,6 +311,23 @@ function sellPickles(n){
   state.money+=n*3
 }
 
+/* YENİ FONKSİYONLAR */
+function sellAllCucumbers(){
+  playClick()
+  let n=Math.floor(state.cucumbers)
+  if(n<=0)return
+  state.money+=n*0.2
+  state.cucumbers=0
+}
+
+function sellAllPickles(){
+  playClick()
+  let good=state.pickles.filter(p=>!p.spoiled)
+  if(!good.length)return
+  state.money+=good.length*3
+  state.pickles=state.pickles.filter(p=>p.spoiled)
+}
+
 setInterval(()=>{
   state.factories.forEach(f=>{
     if(f.on && f.hp>0){state.cucumbers+=f.lvl;f.hp--}
@@ -329,7 +361,6 @@ function openModal(id){playClick();$(id).classList.remove("hidden")}
 function closeModals(){playClick();document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"))}
 updateUI()
 
-// URL param kontrolü ve APK popup
 const params = new URLSearchParams(window.location.search);
 const isAndroid = /Android/i.test(navigator.userAgent);
 
