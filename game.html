@@ -93,7 +93,52 @@ nav button{
   background:#333;
   z-index:5;
 }
+/* Bıçak daha sert kesme */
+#knife.chop{
+  animation: chopPro .18s cubic-bezier(.2,.8,.2,1);
+}
 
+@keyframes chopPro{
+  0%{transform:translateX(-50%) translateY(0) rotate(-15deg)}
+  70%{transform:translateX(-50%) translateY(140px) rotate(30deg)}
+  100%{transform:translateX(-50%) translateY(0) rotate(-10deg)}
+}
+
+/* Salatalık sarsılma */
+#cucumber.hit{
+  animation: cucumberHit .12s;
+}
+
+@keyframes cucumberHit{
+  0%{transform:translateX(-50%) scale(1)}
+  50%{transform:translateX(-50%) scale(0.9,1.1)}
+  100%{transform:translateX(-50%) scale(1)}
+}
+
+/* Salatalık parçaları */
+.slice{
+  position:absolute;
+  width:40px;
+  height:20px;
+  background:#4caf50;
+  border-radius:8px;
+  bottom:70px;
+  left:50%;
+  pointer-events:none;
+  animation: sliceFly .6s forwards ease-out;
+}
+
+@keyframes sliceFly{
+  to{
+    transform:
+      translate(
+        calc(-50% + var(--x)),
+        var(--y)
+      )
+      rotate(var(--r));
+    opacity:0;
+  }
+}
 </style>
 </head>
 
@@ -187,6 +232,18 @@ nav button{
 </div>
 
 <script>
+function spawnSlices(){
+  for(let i=0;i<4;i++){
+    const s=document.createElement("div")
+    s.className="slice"
+    s.style.setProperty("--x",(Math.random()*120-60)+"px")
+    s.style.setProperty("--y",(-Math.random()*120-60)+"px")
+    s.style.setProperty("--r",(Math.random()*120-60)+"deg")
+    $("chop-area").appendChild(s)
+    setTimeout(()=>s.remove(),600)
+  }
+}
+
 const bgm=document.getElementById("bgm")
 const clickSound=document.getElementById("clickSound")
 bgm.volume=.25;clickSound.volume=.6
@@ -218,10 +275,18 @@ function updateUI(){
 $("chop-area").onclick=()=>{
   playClick()
   state.cucumbers++
+
   knife.classList.remove("chop");void knife.offsetWidth
   knife.classList.add("chop")
+
+  cucumber.classList.remove("hit");void cucumber.offsetWidth
+  cucumber.classList.add("hit")
+
+  spawnSlices()
+
   save();updateUI()
 }
+
 
 function buyFactory(){
   playClick()
