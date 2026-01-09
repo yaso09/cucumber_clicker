@@ -78,6 +78,22 @@ nav button{
 }
 .bar div{height:100%;background:var(--accent)}
 .inactive{opacity:.4}
+/* MODAL SCROLL + STICKY KAPAT */
+.modal-box{
+  max-height:90vh;
+  overflow:auto;
+  position:relative;
+  padding-bottom:80px; /* kapat butonu için alan */
+}
+
+.modal-box .close{
+  position:sticky;
+  bottom:0;
+  margin-top:12px;
+  background:#333;
+  z-index:5;
+}
+
 </style>
 </head>
 
@@ -326,6 +342,9 @@ setInterval(()=>{
     if(f.on && f.hp>0){state.cucumbers+=f.lvl;f.hp--}
   })
 
+  /* CANI BİTEN FABRİKALARI SİL */
+  state.factories = state.factories.filter(f => f.hp > 0)
+
   state.aunts.forEach(a=>{
     if(a.hp>0){
       a.hp-=.5
@@ -339,6 +358,9 @@ setInterval(()=>{
       }
     }
   })
+
+  /* CANI BİTEN TEYZELERİ SİL */
+  state.aunts = state.aunts.filter(a => a.hp > 0)
 
   state.pickleQueue.forEach((p,i)=>{
     p.t--
@@ -365,6 +387,17 @@ if (params.get("application") !== "true") {
   document.querySelector("header").style.paddingTop = "12px";
   document.querySelector("nav").style.paddingBottom = "1.9rem";
 }
+
+/* MODAL ARKAPLAN TIKLAMA KAPATMA */
+document.querySelectorAll(".modal").forEach(m=>{
+  m.addEventListener("click",e=>{
+    if(e.target === m){
+      playClick()
+      closeModals()
+    }
+  })
+})
+
 </script>
 
 </body>
