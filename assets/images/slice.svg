@@ -1,0 +1,47 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Skin Rim Gradient (3D edge) -->
+    <linearGradient id="rimGrad" x1="30" y1="0" x2="30" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#43A047"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+    
+    <!-- Flesh Gradient (Juicy) -->
+    <radialGradient id="fleshGrad" cx="30" cy="30" r="30" gradientUnits="userSpaceOnUse">
+      <stop offset="10%" stop-color="#F1F8E9"/>
+      <stop offset="60%" stop-color="#DCEDC8"/>
+      <stop offset="90%" stop-color="#C5E1A5"/>
+      <stop offset="100%" stop-color="#AED581"/>
+    </radialGradient>
+
+    <!-- Glossy Layer -->
+    <radialGradient id="glossGrad" cx="20" cy="20" r="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="white" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Outside Skin -->
+  <circle cx="30" cy="30" r="28" fill="url(#rimGrad)" stroke="#123E16" stroke-width="1"/>
+  
+  <!-- Inside Flesh -->
+  <circle cx="30" cy="30" r="25" fill="url(#fleshGrad)"/>
+  
+  <!-- Glossy Wet Look -->
+  <circle cx="30" cy="30" r="23" fill="url(#glossGrad)" opacity="0.4"/>
+
+  <!-- Seeds Pattern (Detailed teardrop shapes) -->
+  <g opacity="0.9">
+    <path d="M30 15C31 15 32 18 32 20C32 22 31 23 30 23C29 23 28 22 28 20C28 18 29 15 30 15Z" fill="#FFF9C4" transform="rotate(0, 30, 30)"/>
+    <path d="M30 15C31 15 32 18 32 20C32 22 31 23 30 23C29 23 28 22 28 20C28 18 29 15 30 15Z" fill="#FFF9C4" transform="rotate(72, 30, 30)"/>
+    <path d="M30 15C31 15 32 18 32 20C32 22 31 23 30 23C29 23 28 22 28 20C28 18 29 15 30 15Z" fill="#FFF9C4" transform="rotate(144, 30, 30)"/>
+    <path d="M30 15C31 15 32 18 32 20C32 22 31 23 30 23C29 23 28 22 28 20C28 18 29 15 30 15Z" fill="#FFF9C4" transform="rotate(216, 30, 30)"/>
+    <path d="M30 15C31 15 32 18 32 20C32 22 31 23 30 23C29 23 28 22 28 20C28 18 29 15 30 15Z" fill="#FFF9C4" transform="rotate(288, 30, 30)"/>
+    
+    <!-- Central soft core pulse -->
+    <circle cx="30" cy="30" r="6" fill="#F1F8E9" opacity="0.5"/>
+  </g>
+
+  <!-- Reflection Shine -->
+  <path d="M12 20C15 15 25 12 35 15" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+</svg>
