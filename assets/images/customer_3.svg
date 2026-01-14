@@ -1,8 +1,0 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="55" r="30" fill="#e0ac69" /> <!-- Face -->
-  <path d="M30,75 Q50,95 70,75 L70,65 L30,65 Z" fill="#4b3621" /> <!-- Beard -->
-  <rect x="30" y="52" width="15" height="4" rx="1" fill="none" stroke="#000" stroke-width="1.5" /> <!-- Glasses L -->
-  <rect x="55" y="52" width="15" height="4" rx="1" fill="none" stroke="#000" stroke-width="1.5" /> <!-- Glasses R -->
-  <line x1="45" y1="54" x2="55" y2="54" stroke="#000" stroke-width="1.5" /> <!-- Bridge -->
-  <path d="M25,45 Q50,15 75,45" fill="none" stroke="#4b3621" stroke-width="8" stroke-linecap="round" /> <!-- Hair -->
-</svg>

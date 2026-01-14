@@ -238,8 +238,9 @@ export class GameState {
             const names = ["Gurme Ayşe", "Aç Emre", "Turşu Seven Can", "Müptela Murat", "Seçici Selin", "Obur Osman"];
 
             customer.name = names[Math.floor(Math.random() * names.length)];
-            // Assign a random sprite index from the 14x4 grid (0-55)
-            customer.spriteIndex = Math.floor(Math.random() * 56);
+            // Assign a random customer image (1-4)
+            const imageNum = Math.floor(Math.random() * 4) + 1;
+            customer.avatar = `./assets/images/customer_${imageNum}.png`;
             customer.totalWait = customer.expires - Date.now();
 
             this.data.customers.push(customer);

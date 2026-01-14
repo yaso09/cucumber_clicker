@@ -393,40 +393,69 @@ function renderKnives() {
 
 function renderCustomers() {
     if (!ui.lists.customer) return;
-    ui.lists.customer.innerHTML = '';
-
-    if (state.data.customers.length === 0) {
-        ui.lists.customer.innerHTML = '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; opacity:0.5; color:white;">Büyük alıcılar bekleniyor...</div>';
-        return;
-    }
 
     const now = Date.now();
+    const existingCustomers = ui.lists.customer.querySelectorAll('.visual-customer');
+    const currentIds = state.data.customers.map(c => c.id);
+
+    // Remove customers that no longer exist
+    existingCustomers.forEach(el => {
+        if (!currentIds.includes(el.dataset.id)) {
+            el.remove();
+        }
+    });
+
+    // Show empty message only if no customers exist
+    if (state.data.customers.length === 0 && ui.lists.customer.querySelectorAll('.visual-customer').length === 0) {
+        ui.lists.customer.innerHTML = '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; opacity:0.5; color:white;">Müşteriler bekleniyor...</div>';
+    } else {
+        ui.lists.customer.innerHTML = '';
+    }
+
+    // Add new customers or update existing ones
     state.data.customers.forEach(c => {
+        let customerEl = ui.lists.customer.querySelector(`[data-id="${c.id}"]`);
+
+        if (!customerEl) {
+            // Create new customer element only if it doesn't exist
+            const typeIcon = c.type === 'cucumbers' ? '🥒' : '🥫';
+            customerEl = document.createElement('div');
+            customerEl.className = 'visual-customer';
+            customerEl.setAttribute('data-action', 'fulfillCustomer');
+            customerEl.setAttribute('data-id', c.id);
+
+            customerEl.innerHTML = `
+                <div class="order-bubble">
+                    <div style="font-size:0.8rem; margin-bottom:5px;">${c.amount} adet</div>
+                    <div style="font-size:1.5rem;">${typeIcon}</div>
+                    <div style="font-size:0.7rem; color:#666; margin-top:5px; font-weight:normal;">+${c.reward}💰 Veriyor</div>
+                </div>
+                <img src="${c.avatar}" class="customer-avatar" alt="${c.name}">
+                <div style="color:white; font-size:0.75rem; margin-top:5px; font-weight:bold; text-shadow: 0 1px 3px black;">${c.name}</div>
+                <div class="patience-ring" style="width:50px;">
+                    <div class="patience-fill"></div>
+                </div>
+            `;
+            ui.lists.customer.appendChild(customerEl);
+        }
+
+        // Always update patience bar
         const remaining = Math.max(0, c.expires - now);
         const percent = (remaining / c.totalWait) * 100;
-        const color = percent > 60 ? '#4caf50' : (percent > 30 ? '#ffeb3b' : '#f4436');
+        const color = percent > 60 ? '#4caf50' : (percent > 30 ? '#ffeb3b' : '#f44336');
 
-        const typeIcon = c.type === 'cucumbers' ? '🥒' : '🥫';
-
-        const div = document.createElement('div');
-        div.className = 'visual-customer';
-        div.setAttribute('data-action', 'fulfillCustomer');
-        div.setAttribute('data-id', c.id);
-
-        div.innerHTML = `
-            <div class="order-bubble">
-                <div style="font-size:0.8rem; margin-bottom:5px;">${c.amount} adet</div>
-                <div style="font-size:1.5rem;">${typeIcon}</div>
-                <div style="font-size:0.7rem; color:#666; margin-top:5px; font-weight:normal;">+${c.reward}💰 Veriyor</div>
-            </div>
-            <div class="customer-avatar" style="background-position: ${((c.spriteIndex % 14) / 13) * 100}% ${Math.floor(c.spriteIndex / 14) / 3 * 100}%"></div>
-            <div style="color:white; font-size:0.75rem; margin-top:5px; font-weight:bold; text-shadow: 0 1px 3px black;">${c.name}</div>
-            <div class="patience-ring" style="width:50px;">
-                <div style="width:${percent}%; height:100%; background:${color}; transition: width 1s linear;"></div>
-            </div>
-        `;
-        ui.lists.customer.appendChild(div);
+        const patienceFill = customerEl.querySelector('.patience-fill');
+        if (patienceFill) {
+            patienceFill.style.width = `${percent}%`;
+            patienceFill.style.background = color;
+            patienceFill.style.transition = 'width 1s linear';
+        }
     });
+
+    // Show empty message if no customers
+    if (state.data.customers.length === 0) {
+        ui.lists.customer.innerHTML = '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; opacity:0.5; color:white;">Müşteriler bekleniyor...</div>';
+    }
 }
 
 // --- Interaction ---
