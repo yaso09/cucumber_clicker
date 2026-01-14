@@ -1,5 +1,5 @@
 import { $, $$, formatNumber, playSound } from './utils.js';
-import { GameState } from './state.js';
+import { GameState, KNIFE_TYPES } from './state.js';
 
 const state = new GameState();
 
@@ -21,14 +21,20 @@ const ui = {
         aunts: $('#aunts'),
         pickle: $('#pickle'),
         bazaar: $('#bazaar'),
+        knives: $('#knives'),
+        stall: $('#stall'),
+        kantin: $('#kantin'),
         apk: $('#apkModal')
     },
     lists: {
         factory: $('#factoryList'),
         aunt: $('#auntList'),
-        pickle: $('#pickleList')
+        pickle: $('#pickleList'),
+        knife: $('#knifeList'),
+        customer: $('#customerList')
     },
-    notifications: $('#notifications')
+    notifications: $('#notifications'),
+    buffHUD: $('#buff-hud')
 };
 
 // --- Notifications ---
@@ -48,18 +54,25 @@ setInterval(() => {
     const d = state.data;
 
     // Factories Logic
-    d.factories.forEach(f => {
+    const teaBuff = d.buffs.tea > 0;
+    const decayRate = teaBuff ? 0.1 : 0.2; // 50% less decay with tea
+
+    d.factories = d.factories.filter(f => {
         if (f.on && f.hp > 0) {
             d.cucumbers += f.lvl;
-            f.hp--;
-            if (f.hp <= 0) notify("Bir fabrika durdu! (Canı bitti)");
+            f.hp -= decayRate;
+            if (f.hp <= 0) {
+                notify("Bir fabrika yıkıldı! (Canı bitti)");
+                return false;
+            }
         }
+        return true;
     });
 
     // Aunts Logic
-    d.aunts.forEach(a => {
+    d.aunts = d.aunts.filter(a => {
         if ((a.on !== false) && a.hp > 0) {
-            a.hp -= 0.5;
+            a.hp -= (teaBuff ? 0.05 : 0.1);
             a.timer++;
             if (a.timer >= 5) {
                 if (d.cucumbers >= 10) {
@@ -75,8 +88,12 @@ setInterval(() => {
                 }
                 a.timer = 0;
             }
-            if (a.hp <= 0) notify("Bir teyze yoruldu! (Canı bitti)");
+            if (a.hp <= 0) {
+                notify("Bir teyze işi bıraktı! (Canı bitti)");
+                return false;
+            }
         }
+        return true;
     });
 
     // Pickle Queue Logic
@@ -101,6 +118,33 @@ setInterval(() => {
         }
     });
 
+    // Customer Spawning Logic
+    if (Math.random() < 0.05 && d.customers.length < 5 && d.isStallOpen) {
+        const type = Math.random() < 0.7 ? 'cucumbers' : 'pickles';
+        const amount = type === 'cucumbers' ? Math.floor(Math.random() * 20 + 20) : Math.floor(Math.random() * 5 + 5);
+        const baseValue = type === 'cucumbers' ? amount * 0.2 : amount * 3;
+        const reward = Math.floor(baseValue * (1.5 + Math.random() * 1.5)); // 1.5x to 3x profit
+
+        state.addCustomer({
+            id: 'c_' + Math.random().toString(36).substr(2, 9),
+            type,
+            amount,
+            reward,
+            expires: now + 60000 // 1 minute
+        });
+        notify("Yeni bir müşteri geldi! (Tezgah)");
+    }
+
+    // Customer Expiry
+    const beforeCount = d.customers.length;
+    d.customers = d.customers.filter(c => now < c.expires);
+    if (d.customers.length < beforeCount) {
+        notify("Bir müşteri beklemekten sıkıldı ve gitti! 🏃‍♂️");
+    }
+
+    // Buff Ticking
+    state.tickBuffs();
+
     state.save();
     updateUI();
 }, 1000);
@@ -113,11 +157,51 @@ function updateUI() {
     if (ui.money) ui.money.textContent = Math.floor(state.data.money);
     if (ui.pickles) ui.pickles.textContent = state.data.pickles.filter(p => !p.spoiled).length;
 
+    // Visual knife update
+    const knifeData = KNIFE_TYPES[state.data.activeKnife];
+    if (ui.knife && knifeData) {
+        ui.knife.src = knifeData.img;
+    }
+
+    // Stall Shutter & Toggle
+    const shutter = document.getElementById('stallShutter');
+    const toggleBtn = document.getElementById('stallToggleBtn');
+    if (shutter) {
+        if (state.data.isStallOpen) {
+            shutter.classList.remove('closed');
+            if (toggleBtn) toggleBtn.innerText = "Dükkanı Kapat";
+        } else {
+            shutter.classList.add('closed');
+            if (toggleBtn) toggleBtn.innerText = "Dükkanı Aç";
+        }
+    }
+
     // Lists and Zone
     if (!ui.modals.factories.classList.contains('hidden')) renderFactories();
     if (!ui.modals.aunts.classList.contains('hidden')) renderAunts();
     if (!ui.modals.pickle.classList.contains('hidden')) renderPickles();
+    if (!ui.modals.knives.classList.contains('hidden')) renderKnives();
+    if (!ui.modals.stall.classList.contains('hidden')) renderCustomers();
+    renderBuffs();
     renderPicklingQueue();
+}
+
+function renderBuffs() {
+    if (!ui.buffHUD) return;
+    ui.buffHUD.innerHTML = '';
+    const b = state.data.buffs;
+    if (b.tea > 0) {
+        const div = document.createElement('div');
+        div.className = 'buff-badge tea';
+        div.innerHTML = `🍵 ${b.tea}s`;
+        ui.buffHUD.appendChild(div);
+    }
+    if (b.coffee > 0) {
+        const div = document.createElement('div');
+        div.className = 'buff-badge coffee';
+        div.innerHTML = `☕ ${b.coffee}s`;
+        ui.buffHUD.appendChild(div);
+    }
 }
 
 function renderPicklingQueue() {
@@ -201,17 +285,23 @@ function renderFactories() {
         div.className = `card ${f.hp <= 0 || f.on === false ? "inactive" : ""}`;
         div.innerHTML = `
             <div class="card-header">
-                <span>🏭 Fabrika #${i + 1}</span>
-                <span>Lvl ${f.lvl}</span>
+                <span>Doğrama Makinesi #${index + 1}</span>
+                <span class="status-badge ${f.active ? 'active' : 'paused'}">
+                    ${f.active ? 'Çalışıyor' : 'Durduruldu'}
+                </span>
             </div>
-            <div class="progress-track">
-                <div class="progress-fill" style="width:${percent}%; background:${color}"></div>
+            <div class="stats-row">
+                <span>Hız: ${f.productionRate}/sn</span>
+                <span>Durum: %${Math.floor(f.hp)} HP</span>
             </div>
+            <div class="hp-bar"><div style="width: ${f.hp}%"></div></div>
             <div class="card-actions">
-                <button class="btn-secondary" data-action="toggleFactory" data-index="${i}">${f.on !== false ? "Durdur" : "Çalıştır"}</button>
-                <button class="btn-primary" data-action="repairFactory" data-index="${i}">Tamir Et (20 💰)</button>
-                <button class="btn-primary" data-action="upgradeFactory" data-index="${i}">Geliştir (${f.lvl * 50} 💰)</button>
-                <button class="btn-danger" data-action="deleteFactory" data-index="${i}">Yık 🗑️</button>
+                <button class="btn-secondary" data-action="toggleFactory" data-index="${index}">
+                    ${f.active ? 'Durdur' : 'Başlat'}
+                </button>
+                <button class="btn-secondary" data-action="repairFactory" data-index="${index}">Tamir</button>
+                <button class="btn-primary" data-action="upgradeFactory" data-index="${index}">Yükselt</button>
+                <button class="btn-danger" data-action="deleteFactory" data-index="${index}">Kaldır</button>
             </div>
         `;
         ui.lists.factory.appendChild(div);
@@ -265,6 +355,77 @@ function renderPickles() {
             </div>` : ''}
         `;
         ui.lists.pickle.appendChild(div);
+    });
+}
+
+function renderKnives() {
+    if (!ui.lists.knife) return;
+    ui.lists.knife.innerHTML = '';
+
+    Object.entries(KNIFE_TYPES).forEach(([id, knife]) => {
+        const isOwned = state.data.knives.includes(id);
+        const isActive = state.data.activeKnife === id;
+
+        const div = document.createElement('div');
+        div.className = `card ${isActive ? 'active-item' : ''}`;
+        div.innerHTML = `
+            <div class="card-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${knife.img}" style="width:30px; height:30px; object-fit:contain;">
+                    <span>${knife.name}</span>
+                </div>
+                <span>Güç: x${knife.power}</span>
+            </div>
+            <div class="card-actions">
+                ${isOwned ?
+                `<button class="btn-secondary" ${isActive ? 'disabled' : `data-action="switchKnife" data-id="${id}"`}>
+                        ${isActive ? 'Kuşanıldı' : 'Kuşan'}
+                    </button>` :
+                `<button class="btn-primary" data-action="buyKnife" data-id="${id}" data-cost="${knife.cost}">
+                        Satın Al (${knife.cost} 💰)
+                    </button>`
+            }
+            </div>
+        `;
+        ui.lists.knife.appendChild(div);
+    });
+}
+
+function renderCustomers() {
+    if (!ui.lists.customer) return;
+    ui.lists.customer.innerHTML = '';
+
+    if (state.data.customers.length === 0) {
+        ui.lists.customer.innerHTML = '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; opacity:0.5; color:white;">Büyük alıcılar bekleniyor...</div>';
+        return;
+    }
+
+    const now = Date.now();
+    state.data.customers.forEach(c => {
+        const remaining = Math.max(0, c.expires - now);
+        const percent = (remaining / c.totalWait) * 100;
+        const color = percent > 60 ? '#4caf50' : (percent > 30 ? '#ffeb3b' : '#f4436');
+
+        const typeIcon = c.type === 'cucumbers' ? '🥒' : '🥫';
+
+        const div = document.createElement('div');
+        div.className = 'visual-customer';
+        div.setAttribute('data-action', 'fulfillCustomer');
+        div.setAttribute('data-id', c.id);
+
+        div.innerHTML = `
+            <div class="order-bubble">
+                <div style="font-size:0.8rem; margin-bottom:5px;">${c.amount} adet</div>
+                <div style="font-size:1.5rem;">${typeIcon}</div>
+                <div style="font-size:0.7rem; color:#666; margin-top:5px; font-weight:normal;">+${c.reward}💰 Veriyor</div>
+            </div>
+            <div class="customer-avatar" style="background-position: ${((c.spriteIndex % 14) / 13) * 100}% ${Math.floor(c.spriteIndex / 14) / 3 * 100}%"></div>
+            <div style="color:white; font-size:0.75rem; margin-top:5px; font-weight:bold; text-shadow: 0 1px 3px black;">${c.name}</div>
+            <div class="patience-ring" style="width:50px;">
+                <div style="width:${percent}%; height:100%; background:${color}; transition: width 1s linear;"></div>
+            </div>
+        `;
+        ui.lists.customer.appendChild(div);
     });
 }
 
@@ -438,7 +599,13 @@ if (ui.workstation) {
         if (isSweeping || cucumberHealth <= 0) return;
 
         // 1. Logic
-        state.clickCucumber();
+        const knifePower = KNIFE_TYPES[state.data.activeKnife].power;
+        const coffeeMultiplier = state.data.buffs.coffee > 0 ? 2 : 1;
+        const totalPower = knifePower * coffeeMultiplier;
+
+        for (let i = 0; i < totalPower; i++) {
+            state.clickCucumber();
+        }
 
         // 1.5 Music (Start if paused)
         const bgm = $('#bgm');
@@ -494,25 +661,13 @@ if (ui.workstation) {
     });
 }
 
-// Global Event Delegation for Buttons
+// Global Event Delegation
 document.body.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
+    const el = e.target.closest('[data-action], button'); // Check for data-action or any button
+    if (!el) return;
 
-    // Handle Modal Openers
-    if (btn.dataset.modal) {
-        playSound('clickSound');
-        const m = ui.modals[btn.dataset.modal];
-        if (m) {
-            m.classList.remove('hidden');
-            // Allow a small delay for transition
-            requestAnimationFrame(() => m.classList.add('active'));
-            updateUI();
-        }
-    }
-
-    // Handle Modal Closers
-    if (btn.classList.contains('close') || btn.classList.contains('btn-close')) {
+    // Handle Modal Closers (can be any button with these classes)
+    if (el.classList.contains('close') || el.classList.contains('btn-close')) {
         playSound('clickSound');
         $$('.modal-overlay').forEach(m => {
             m.classList.remove('active');
@@ -521,15 +676,37 @@ document.body.addEventListener('click', (e) => {
     }
 
     // Handle Game Actions
-    const action = btn.dataset.action;
-    const index = btn.dataset.index;
+    const action = el.dataset.action;
+    const id = el.dataset.id;
+    const type = el.dataset.type;
+    const index = parseInt(el.dataset.index);
+
+    // Handle Modal Openers
+    if (el.dataset.modal) {
+        playSound('clickSound');
+        const m = ui.modals[el.dataset.modal];
+        if (m) {
+            m.classList.remove('hidden');
+            requestAnimationFrame(() => m.classList.add('active'));
+            updateUI();
+        }
+        return;
+    }
 
     if (action) {
         playSound('clickSound');
         let result = false;
 
         switch (action) {
-            case 'buyFactory': result = state.buyFactory(); break;
+            case 'buyFactory':
+                const success = state.buyFactory();
+                if (success) {
+                    notify("Yeni bir doğrama makinesi kuruldu! ⚙️");
+                    updateUI();
+                } else {
+                    notify("Yetersiz bakiye!");
+                }
+                break;
             case 'buyAunt': result = state.buyAunt(); break; // Fix: was buyFactory
             case 'startPickle': result = state.startPickle(); break;
             case 'sellCucumbers': result = state.sellCucumbers(10); break;
@@ -547,14 +724,57 @@ document.body.addEventListener('click', (e) => {
             case 'toggleAunt': state.toggleAunt(index); updateUI(); break;
             case 'upgradeAunt': state.upgradeAunt(index); updateUI(); break;
             case 'deleteAunt': if (confirm("Teyzeyi kovmak istediğine emin misin?")) state.deleteAunt(index); updateUI(); break;
+
+            case 'toggleStall':
+                const isOpen = state.toggleStall();
+                notify(isOpen ? "Dükkan açıldı! Müşteriler geliyor." : "Dükkan kapandı. Huzur...");
+                updateUI();
+                break;
+
+            case 'buyDrink':
+                if (state.buyDrink(el.dataset.type, parseInt(el.dataset.cost))) {
+                    const icon = el.dataset.type === 'tea' ? '🍵' : '☕';
+                    notify(`${icon} içildi! Enerji tavan!`);
+                    playSound('clickSound', 1.2);
+                    updateUI();
+                } else {
+                    notify("Yetersiz bakiye!");
+                }
+                break;
+
+            // Knife Shop Actions
+            case 'buyKnife':
+                const knifeId = el.dataset.id;
+                const cost = parseInt(el.dataset.cost);
+                if (state.buyKnife(knifeId, cost)) {
+                    notify(`${KNIFE_TYPES[knifeId].name} satın alındı!`);
+                    updateUI();
+                } else {
+                    notify("Yetersiz bakiye!");
+                }
+                break;
+            case 'switchKnife':
+                state.switchKnife(el.dataset.id);
+                updateUI();
+                break;
+
+            // Stall Actions
+            case 'fulfillCustomer':
+                if (state.fulfillCustomer(id)) {
+                    playSound('clickSound', 1.5);
+                    el.classList.add('served'); // Trigger animation
+                    setTimeout(() => {
+                        notify("Sipariş teslim edildi! 💰");
+                        updateUI();
+                    }, 400);
+                } else {
+                    notify("Yetersiz malzeme!");
+                }
+                break;
         }
 
         if (result) updateUI();
     }
-
-    // Explicit handlers for Bazaar (since they have params)
-    if (btn.id === 'btn-sell-10') { playSound('clickSound'); state.sellCucumbers(10); updateUI(); }
-    if (btn.id === 'btn-sell-1pick') { playSound('clickSound'); state.sellPickles(1); updateUI(); }
 });
 
 // Modal Overlay Click to Close

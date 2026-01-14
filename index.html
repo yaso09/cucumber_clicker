@@ -12,43 +12,41 @@
 <body>
 
   <header>
-    <h1>🥒 Salatalık Doğra</h1>
+    <div class="header-logo">
+      <img src="assets/images/cucumber.svg" alt="Logo" class="mini-cucumber">
+      <h1>Salatalık Doğra</h1>
+    </div>
   </header>
 
   <main>
-    <div class="landing-container">
-      <h2 class="landing-title">Salatalık İmparatorluğu</h2>
-      <p class="landing-desc">
-        Hoş geldin! Milyonlarca salatalık doğra, fabrikalar kur, teyzelerle anlaş ve turşu imparatorluğunu yönet.
-      </p>
+    <div class="landing-hero">
+      <div class="hero-bg-blobs">
+        <div class="blob"></div>
+        <div class="blob"></div>
+      </div>
 
-      <div class="card-actions" style="max-width:300px; margin:auto;">
-        <button onclick="startGame()" class="big-btn">Oyunu Başlat</button>
+      <div class="landing-container">
+        <div class="badge">Sürüm 1.2.0</div>
+        <h2 class="landing-title">Salatalık İmparatorluğu</h2>
+        <p class="landing-desc">
+          Milyonlarca salatalık doğra, fabrikalar kur, teyzelerle anlaş ve turşu imparatorluğunu yöneten en büyük
+          turşucu ol.
+        </p>
 
-        <button id="btn-apk" class="big-btn btn-secondary hidden" onclick="openApkModal()">APK İndir</button>
-        <button id="openLoginModal" class="big-btn btn-secondary" onclick="openLoginModal()" hidden>Oturum Aç</button>
+        <div class="landing-actions">
+          <button onclick="startGame()" class="primary-hero-btn">
+            <span class="icon">🚀</span> Oyunu Başlat
+          </button>
+          <button id="btn-apk" class="secondary-hero-btn hidden" onclick="openApkModal()">
+            <span class="icon">🤖</span> APK İndir
+          </button>
+        </div>
       </div>
     </div>
   </main>
 
-  <!-- Modals -->
-  <div id="loginModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span class="modal-title">Oturum Aç</span>
-        <button class="btn-close" onclick="closeModals()">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="card-actions">
-          <button class="btn-secondary" onclick="loginWith('oauth_google')">Google ile Giriş</button>
-          <button class="btn-secondary" onclick="loginWith('oauth_facebook')">Facebook ile Giriş</button>
-          <button class="btn-secondary" onclick="loginWith('oauth_discord')">Discord ile Giriş</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="apkModal" class="modal-overlay">
+  <!-- APK Modal (Simplified) -->
+  <div id="apkModal" class="modal-overlay hidden">
     <div class="modal-content">
       <div class="modal-header">
         <span class="modal-title">Uygulamayı İndir</span>
@@ -56,27 +54,21 @@
       </div>
       <div class="modal-body">
         <p>Bu oyunu Android cihazına yüklemek ister misin?</p>
-        <button class="big-btn" onclick="window.location.href='./latest.apk'">APK İndir</button>
+        <button class="primary-hero-btn" onclick="window.location.href='./latest.apk'">APK İndir</button>
       </div>
     </div>
   </div>
 
-  <script src="js/utils.js" type="module"></script>
   <script>
     const isAndroid = /Android/i.test(navigator.userAgent);
 
-    // UI Helpers (replicating basic logic here since we didn't import game.js)
     function $(id) { return document.getElementById(id); }
-
-    function openLoginModal() {
-      $('loginModal').classList.remove('hidden');
-      setTimeout(() => $('loginModal').classList.add('active'), 10);
-    }
 
     function openApkModal() {
       if (isAndroid) {
-        $('apkModal').classList.remove('hidden');
-        setTimeout(() => $('apkModal').classList.add('active'), 10);
+        const m = $('apkModal');
+        m.classList.remove('hidden');
+        requestAnimationFrame(() => m.classList.add('active'));
       } else {
         alert("Bu cihaz için APK bulunmuyor.");
       }
@@ -102,27 +94,6 @@
     if (isAndroid) {
       $('btn-apk').classList.remove('hidden');
     }
-
-    // Clerk Logic (Preserved)
-    async function loginWith(strategy) {
-      if (window.Clerk) {
-        await Clerk.load();
-        Clerk.openSignIn(strategy);
-      } else {
-        console.warn("Clerk not loaded");
-      }
-    }
-
-    async function loadClerk() {
-      if (window.Clerk) {
-        await Clerk.load();
-        if (!Clerk.isSignedIn) {
-          $('openLoginModal').hidden = false;
-        }
-      }
-    }
-
-    loadClerk();
 
     // Modal Close Listeners
     document.querySelectorAll('.modal-overlay').forEach(overlay => {

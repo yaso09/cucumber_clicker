@@ -1,0 +1,8 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="55" r="30" fill="#ffdbac" /> <!-- Face -->
+  <path d="M30,35 Q50,5 70,35 Z" fill="#ffffff" stroke="#ccc" stroke-width="1" /> <!-- Chef Hat Top -->
+  <rect x="35" y="30" width="30" height="10" fill="#ffffff" stroke="#ccc" stroke-width="1" /> <!-- Chef Hat Base -->
+  <circle cx="40" cy="55" r="3" fill="#333" /> <!-- Eye L -->
+  <circle cx="60" cy="55" r="3" fill="#333" /> <!-- Eye R -->
+  <path d="M40,70 Q50,80 60,70" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" /> <!-- Smile -->
+</svg>

@@ -21,7 +21,7 @@
       <span id="count">0</span>
     </div>
     <div class="resource">
-      <span>🥫</span>
+      <span class="icon">🥫</span>
       <span id="pickles">0</span>
     </div>
     <div class="resource">
@@ -29,6 +29,9 @@
       <span id="money">0</span>
     </div>
   </header>
+
+  <!-- Buff Display -->
+  <div id="buff-hud"></div>
 
   <!-- Main Game Area -->
   <main>
@@ -48,16 +51,90 @@
 
   <!-- Navigation -->
   <nav>
-    <button data-modal="market"><span>🛒</span> <span>Market</span></button>
-    <button data-modal="factories"><span>🏭</span> <span>Fabrikalar</span></button>
+    <button data-modal="factories"><span>⚙️</span> <span>Makineler</span></button>
     <button data-modal="aunts"><span>👵</span> <span>Teyzeler</span></button>
+    <button data-modal="stall"><span>🏪</span> <span>Tezgah</span></button>
+    <button data-modal="knives"><span>🔪</span> <span>Bıçakçı</span></button>
+    <button data-modal="kantin"><span>☕</span> <span>Kantin</span></button>
     <button data-modal="pickle"><span>🥫</span> <span>Turşular</span></button>
     <button data-modal="bazaar"><span>⚖️</span> <span>Pazar</span></button>
   </nav>
 
   <!-- MODALS -->
 
-  <!-- Market Modal -->
+  <!-- Knife Shop Modal -->
+  <div id="knives" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">Bıçakçı</span>
+        <button class="btn-close">×</button>
+      </div>
+      <div class="modal-body" id="knifeList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Stall Modal (Visual Redesign) -->
+  <div id="stall" class="modal-overlay">
+    <div class="modal-content stall-modal">
+      <div class="modal-header">
+        <span class="modal-title">Pazar Tezgahı</span>
+        <button class="btn-primary" data-action="toggleStall" id="stallToggleBtn"
+          style="font-size: 0.8rem; padding: 5px 10px;">Dükkanı Kapat</button>
+        <button class="btn-close">×</button>
+      </div>
+      <div class="modal-body stall-body">
+        <div class="market-scene">
+          <div class="market-awning"></div>
+          <div class="market-shutter" id="stallShutter">
+            <div class="shutter-handle"></div>
+            <div class="closed-sign">KAPALI</div>
+          </div>
+          <div class="market-decor left-props"></div>
+          <div class="stall-customers" id="customerList">
+            <!-- Customers appear here as characters -->
+          </div>
+          <div class="market-decor right-props"></div>
+          <div class="wooden-counter">
+            <div class="counter-props"></div>
+          </div>
+        </div>
+        <p class="stall-hint">Müşterilerin siparişlerini teslim etmek için üzerlerine tıkla!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kantin Modal -->
+  <div id="kantin" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">Kantin</span>
+        <button class="btn-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="drinkList">
+          <div class="card">
+            <div class="card-header">
+              <span>🍵 Sıcak Çay</span>
+              <span>100 💰</span>
+            </div>
+            <p style="font-size:0.85rem; margin:10px 0; opacity:0.8;">Çalışanların yorulmasını (HP kaybı) 120 saniye
+              boyunca %50 azaltır.</p>
+            <button class="btn-primary" data-action="buyDrink" data-type="tea" data-cost="100">Satın Al</button>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <div class="card-header">
+              <span>☕ Türk Kahvesi</span>
+              <span>250 💰</span>
+            </div>
+            <p style="font-size:0.85rem; margin:10px 0; opacity:0.8;">Tıklama gücünü 120 saniye boyunca x2 yapar.</p>
+            <button class="btn-primary" data-action="buyDrink" data-type="coffee" data-cost="250">Satın Al</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="market" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -107,6 +184,25 @@
       <div class="modal-body" id="auntList">
         <!-- Populated by JS -->
         <p style="text-align:center; opacity:0.6;">Henüz teyzen yok.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Factories (Now Machines) Modal -->
+  <div id="factories" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">Doğrama Makineleri</span>
+        <button class="btn-close">×</button>
+      </div>
+      <div class="modal-body">
+        <button class="btn-primary buy-btn" data-action="buyFactory">
+          <span>Yeni Makine Al</span>
+          <span class="price-tag">500 💰</span>
+        </button>
+        <div id="factoryList">
+          <!-- Populated by JS -->
+        </div>
       </div>
     </div>
   </div>

@@ -1,1 +1,23 @@
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="428.78412" height="66.81704" viewBox="0,0,428.78412,66.81704"><g transform="translate(-25.60794,-146.59148)"><g stroke="none" stroke-miterlimit="10"><path d="M267.05334,190.08569l-6.95328,2.53505l0.65187,20.78778c-204.2526,-11.33529 -235.144,-51.06357 -235.144,-51.06357c6.30141,-7.56888 50.44749,-15.75347 50.44749,-15.75347h190.99791z" fill="#d1d2d1"/><path d="M267.05334,146.59148h176.83785c0,0 32.15892,37.88089 -16.07946,41.64725c0,0 -13.21847,-16.07946 -30.23952,0c0,0 -40.66944,6.62734 -71.88677,0c0,0 -26.47317,-13.97899 -39.72786,2.93341c0,0 -11.33529,5.50468 -18.90423,-1.08645z" fill="#000000"/><path d="M284.0715,160.2445c0,-2.74174 2.22262,-4.96435 4.96435,-4.96435c2.74174,0 4.96436,2.22261 4.96436,4.96435c0,2.74173 -2.22262,4.96435 -4.96436,4.96435c-2.74174,0 -4.96435,-2.22262 -4.96435,-4.96435z" fill="#d1d2d1"/><path d="M355.7772,160.2445c0,-2.74174 2.22261,-4.96435 4.96435,-4.96435c2.74174,0 4.96436,2.22261 4.96436,4.96435c0,2.74173 -2.22262,4.96435 -4.96436,4.96435c-2.74174,0 -4.96435,-2.22262 -4.96435,-4.96435z" fill="#d1d2d1"/><path d="M424.47705,160.2445c0,-2.74174 2.22262,-4.96435 4.96435,-4.96435c2.74174,0 4.96436,2.22261 4.96436,4.96435c0,2.74173 -2.22262,4.96435 -4.96436,4.96435c-2.74174,0 -4.96435,-2.22262 -4.96435,-4.96435z" fill="#d1d2d1"/></g></g></svg><!--rotationCenter:214.39206091836732:33.40852000000001-->
+<svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0e0e0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#b0b0b0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#808080;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="damascus" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.2" />
+      <stop offset="25%" style="stop-color:#000000;stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.2" />
+      <stop offset="75%" style="stop-color:#000000;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+  <!-- Blade -->
+  <path d="M10,20 Q10,10 60,10 L160,10 L160,25 Q160,35 10,35 Z" fill="url(#bladeGrad)" stroke="#666" stroke-width="0.5"/>
+  <path d="M10,20 Q10,10 60,10 L160,10 L160,25 Q160,35 10,35 Z" fill="url(#damascus)"/>
+  <!-- Handle -->
+  <rect x="160" y="12" width="40" height="16" rx="4" fill="#3e2723" stroke="#212121" stroke-width="1"/>
+  <circle cx="170" cy="20" r="1.5" fill="#d4af37"/>
+  <circle cx="185" cy="20" r="1.5" fill="#d4af37"/>
+</svg>

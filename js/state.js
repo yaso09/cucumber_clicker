@@ -6,7 +6,12 @@ const INITIAL_STATE = {
     factories: [],
     aunts: [],
     pickles: [],
-    pickleQueue: [] // Objects {t: timeRemaining}
+    pickleQueue: [],
+    knives: ['basic'], // Owned knife IDs
+    activeKnife: 'basic',
+    customers: [], // {id, type, amount, reward, expires}
+    buffs: { tea: 0, coffee: 0 },
+    isStallOpen: true
 };
 
 export class GameState {
@@ -18,6 +23,11 @@ export class GameState {
         if (!this.data.aunts) this.data.aunts = [];
         if (!this.data.pickles) this.data.pickles = [];
         if (!this.data.pickleQueue) this.data.pickleQueue = [];
+        if (!this.data.knives) this.data.knives = ['basic'];
+        if (!this.data.activeKnife) this.data.activeKnife = 'basic';
+        if (!this.data.customers) this.data.customers = [];
+        if (!this.data.buffs) this.data.buffs = { tea: 0, coffee: 0 };
+        if (this.data.isStallOpen === undefined) this.data.isStallOpen = true;
     }
 
     save() {
@@ -195,4 +205,105 @@ export class GameState {
         }
         return false;
     }
+
+    // --- Knife Management ---
+
+    toggleStall() {
+        this.data.isStallOpen = !this.data.isStallOpen;
+        return this.data.isStallOpen;
+    }
+
+    buyKnife(id, cost) {
+        if (this.data.money >= cost && !this.data.knives.includes(id)) {
+            this.data.money -= cost;
+            this.data.knives.push(id);
+            this.data.activeKnife = id;
+            return true;
+        }
+        return false;
+    }
+
+    switchKnife(id) {
+        if (this.data.knives.includes(id)) {
+            this.data.activeKnife = id;
+            return true;
+        }
+        return false;
+    }
+
+    // --- Customer Management ---
+
+    addCustomer(customer) {
+        if (this.data.customers.length < 5) {
+            const names = ["Gurme Ayşe", "Aç Emre", "Turşu Seven Can", "Müptela Murat", "Seçici Selin", "Obur Osman"];
+
+            customer.name = names[Math.floor(Math.random() * names.length)];
+            // Assign a random sprite index from the 14x4 grid (0-55)
+            customer.spriteIndex = Math.floor(Math.random() * 56);
+            customer.totalWait = customer.expires - Date.now();
+
+            this.data.customers.push(customer);
+            return true;
+        }
+        return false;
+    }
+
+    fulfillCustomer(customerId) {
+        const index = this.data.customers.findIndex(c => c.id === customerId);
+        if (index === -1) return false;
+
+        const customer = this.data.customers[index];
+        let success = false;
+
+        if (customer.type === 'cucumbers') {
+            if (this.data.cucumbers >= customer.amount) {
+                this.data.cucumbers -= customer.amount;
+                success = true;
+            }
+        } else if (customer.type === 'pickles') {
+            const goodPickles = this.data.pickles.filter(p => !p.spoiled);
+            if (goodPickles.length >= customer.amount) {
+                let removed = 0;
+                this.data.pickles = this.data.pickles.filter(p => {
+                    if (removed < customer.amount && !p.spoiled) {
+                        removed++;
+                        return false;
+                    }
+                    return true;
+                });
+                success = true;
+            }
+        }
+
+        if (success) {
+            this.data.money += customer.reward;
+            this.data.customers.splice(index, 1);
+            return true;
+        }
+        return false;
+    }
+
+    // --- Buff Management ---
+
+    buyDrink(type, cost) {
+        if (this.data.money >= cost) {
+            this.data.money -= cost;
+            // Add 2 minutes of buff
+            this.data.buffs[type] += 120;
+            return true;
+        }
+        return false;
+    }
+
+    tickBuffs() {
+        if (this.data.buffs.tea > 0) this.data.buffs.tea--;
+        if (this.data.buffs.coffee > 0) this.data.buffs.coffee--;
+    }
 }
+
+export const KNIFE_TYPES = {
+    basic: { name: 'Mutfak Bıçağı', power: 1, cost: 0, img: 'assets/images/knife.svg' },
+    chef: { name: 'Şef Bıçağı', power: 3, cost: 500, img: 'assets/images/knife_chef.svg' },
+    cleaver: { name: 'Satır', power: 8, cost: 2000, img: 'assets/images/knife_cleaver.svg' },
+    gold: { name: 'Altın Bıçak', power: 25, cost: 10000, img: 'assets/images/knife_gold.svg' }
+};

@@ -1,0 +1,19 @@
+{
+  "name": "cucumber_clicker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "if not exist www mkdir www && xcopy /E /Y css www\\css\\ && xcopy /E /Y js www\\js\\ && xcopy /E /Y assets www\\assets\\ && copy /Y *.html www\\"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "cordova": "^13.0.0"
+  }
+}
